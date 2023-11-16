@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [14,15,16]
+        node-version: [16,18]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -21,7 +21,7 @@ jobs:
         path: ~/.pnpm-store
         key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
     - name: Install pnpm
-      run: curl -f https://get.pnpm.io/v5.js | node - add --global pnpm@5
+      run: npm install -g pnpm@8.7.0
     - name: pnpm Build
       run: pnpm install
     - name: test

@@ -32,7 +32,7 @@
     "release": "quick-publish"
   },
   "engines": {
-    "node": ">=18",
+    "node": ">=16",
     "pnpm": "8.7.0"
   },
   "packageManager": "pnpm@8.7.0",
