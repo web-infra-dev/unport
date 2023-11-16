@@ -28,9 +28,13 @@
     "lib": [
       "es5",
       "es6"
-    ]
+    ],
+    "paths": {
+      "unport": ["./src/index.ts"]
+    }
   },
   "include": [
+    "examples",
     "src",
     "types",
     "*.d.ts"

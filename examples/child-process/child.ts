@@ -22,5 +22,5 @@ port.onMessage('syn', payload => {
   port.postMessage('ack', { pid: 'child' });
 });
 port.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload.name));
+  console.log('[child] [body]', JSON.stringify(payload));
 });
