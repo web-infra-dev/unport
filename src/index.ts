@@ -141,6 +141,11 @@ export interface UnportChannel {
 /**
  * Expose UnPort class
  */
+
+const missingChannelImplementation = () => {
+  throw new Error('missing channel implementation');
+};
+
 export class UnPort<
   T extends MessageDefinition,
   U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
@@ -167,11 +172,7 @@ export class UnPort<
     return this;
   }
 
-  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = () => {
-    throw new Error('missing implementation');
-  }
+  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = missingChannelImplementation
 
-  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = () => {
-    throw new Error('missing implementation');
-  }
+  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = missingChannelImplementation
 }
