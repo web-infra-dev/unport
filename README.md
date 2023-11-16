@@ -1,63 +1,130 @@
 <p align="center">
-  <img alt="Unport Logo" src="./logo.png" width="400">
+  <img alt="Unport Logo" src="./logo.png" width="600">
 </p>
 
 <div align="center">
 
-[![MIT licensed][license-badge]][license-url]
+[![NPM version][npm-badge]][npm-url]
 [![Build Status][ci-badge]][ci-url]
-[![npm version][npm-badge]][npm-url]
 [![Code Coverage][code-coverage-badge]][code-coverage-url]
 
 </div>
 
-# 🌍 Unport
+## ⚓ Unport
 
-`Unport` is a Universal Port for cross JSContext communication with 100% type inference capabilities. Built to make communication between different JSContexts not only possible but easy and with robust typing. This is designed by [ULIVZ](https://github.com/ULIVZ) to bridge the gap between complex JSContext environments such as Node.js, Node.js Child Process, Webviews, Webworker, and iframes.
+Unport is a Universal Port with 100% type inference capability for cross JSContext communication.
 
-## 🚀 The Problem and Our Solution
-In many development scenarios, we have multiple JSContexts that need to communicate with each other. These can be Node.js processes, Webviews, Web Workers, iframes, etc. Each of these JSContexts has its own way of communication, and lack of typing can make code maintenance quite difficult for complex cross JSContext communication scenarios.
+Unport is designed to solve the complexity of JSContext environments such as Node.js, Webview, subprocess, Web Worker, worker_threads, WebSocket, iframe, MessageChannel, ServiceWorker, etc. Each JSContext communicates with the outside world in different ways, and the lack of types makes the code for complex cross JSContext communication projects difficult. In complex large projects, it is often difficult to know where the message is going and what fields the recipient needs.
 
-`Unport` strives to address these issues and provide a streamlined way to handle cross JSContext communication in three ways:
+## 💡 Features
 
-1. ### Unified Port Paradigm:
-Unport uses a unified port paradigm for communication. We abstract the complexity behind a simple-to-use Port, making it easier for you to manage cross-JSContext communication.
+1. Provides a unified Port paradigm. You only need to define the message types that different JSContexts need to pass, and you will have a complete type of unified Port (Unport).
+2. 100% type inference. Users only need to maintain the types of communication between JSContexts, and leave the rest to unport.
+3. Lightweight.
 
-2. ### Robust Typing:
-With the power of TypeScript, Unport provides 100% type inference capability. You only need to focus on managing the communication types between different JSContexts. The rest of the complex work of ensuring typed communication is handled by Unport.
+## ⚡️ Quick Start
 
-## 🌈 Quick Start
-To install Unport, use the following command:
+To implement a process of sending messages after a parent-child process is connected:
 
-```bash
-npm install unport
+1. Define Message Definition:
+
+```ts
+// channel.js
+import { UnPort } from 'unport';
+
+export type MessageDefinition = {
+  parent2child: {
+    syn: {
+      pid: string;
+    };
+    body: {
+      name: string;
+      path: string;
+    }
+  };
+  child2parent: {
+    ack: {
+      pid: string;
+    };
+  };
+};
+
+export type ChildPort = UnPort<MessageDefinition, 'child2parent'>;
+export type ParentPort = UnPort<MessageDefinition, 'parent2child'>;
 ```
 
-## 🍕 Examples
- 
-You can find usage examples under the `/examples` folder of this repository.
+2. Parent process implementation:
 
-## 📚 API Documentation
+```ts
+// parent.js
+import { defineIntermediatePort, UnPort } from 'unport';
+import { ChildPort } from './channel';
 
-Check out our comprehensive API documentation [here](url-to-your-documentation).
+// 1. Initialize a port
+const port: ChildPort = new UnPort();
 
-## 👏 Contributing
+// 2. Implement a intermediate port based on underlying IPC capabilities
+port.implement(() => {
+  const intermediatePort = defineIntermediatePort({
+    postMessage: message => {
+      process.send && process.send(JSON.stringify(message));
+    },
+  });
 
-Contributions of any kind are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
+  process.on('message', (message: string) => {
+    intermediatePort.onmessage && intermediatePort.onmessage(JSON.parse(message));
+  });
+  return intermediatePort;
+});
 
-## 👥 Maintainers
+// 3. Post message
+port.onMessage('syn', payload => {
+  console.log('[child] [syn]', payload.pid);
+  port.postMessage('ack', { pid: 'child' });
+});
+port.onMessage('body', payload => {
+  console.log('[child] [body]', JSON.stringify(payload.name));
+});
+```
 
-[@ULIVZ](https://github.com/ULIVZ)
+3. Child process implementation:
 
-## 📜 License
+```ts
+// child.js
+import { defineIntermediatePort, UnPort } from 'unport';
+import { ChildPort } from './channel';
 
-Unport is free and open-source software licensed under the [MIT License](./LICENSE).
+// 1. Initialize a port
+const port: ChildPort = new UnPort();
 
-[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
-[license-url]: ./LICENSE
-[ci-badge]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml/badge.svg
-[ci-url]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml
-[npm-badge]: https://img.shields.io/npm/v/unport/latest?color=brightgreen
+// 2. Implement a intermediate port based on underlying IPC capabilities
+port.implement(() => {
+  const intermediatePort = defineIntermediatePort({
+    postMessage: message => {
+      process.send && process.send(JSON.stringify(message));
+    },
+  });
+
+  process.on('message', (message: string) => {
+    intermediatePort.onmessage && intermediatePort.onmessage(JSON.parse(message));
+  });
+  return intermediatePort;
+});
+
+// 3. Post message
+port.onMessage('syn', payload => {
+  console.log('[child] [syn]', payload.pid);
+  port.postMessage('ack', { pid: 'child' });
+});
+port.onMessage('body', payload => {
+  console.log('[child] [body]', JSON.stringify(payload.name));
+});
+
+```
+
+[npm-badge]: https://img.shields.io/npm/v/unport.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/unport
+[ci-badge]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml/badge.svg?event=push&branch=main
+[ci-url]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml?query=event%3Apush+branch%3Amain
 [code-coverage-badge]: https://codecov.io/github/ULIVZ/unport/branch/main/graph/badge.svg
 [code-coverage-url]: https://codecov.io/gh/ULIVZ/unport
