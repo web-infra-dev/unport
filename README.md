@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Unport Logo" src="./logo.png" width="600">
+  <img alt="Unport Logo" src="./logo.png" width="400">
 </p>
 
 <div align="center">
