@@ -1,6 +1,6 @@
 <p align="center">
-  <img alt="Unport Logo" src="./.media/type-infer.png"><br>
-  <img alt="Unport Logo" src="./.media/logo.png" width="200">
+  <img alt="Unport Logo" src="https://github.com/ulivz/unport/blob/main/.media/type-infer.png?raw=true"><br>
+  <img alt="Unport Logo" src="https://github.com/ulivz/unport/blob/main/.media/logo.png?raw=true" width="200">
 </p>
 
 <div align="center">
