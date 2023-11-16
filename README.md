@@ -1,42 +1,63 @@
-<h1 align="center">ts-lib-template</h1>
-
 <p align="center">
-    A hassle-free TS library template.
+  <img alt="Unport Logo" src="./logo.png" width="600">
 </p>
 
-<p align="center">
-    <a href="https://npmjs.com/package/ts-lib-template"><img src="https://img.shields.io/npm/v/ts-lib-template.svg?style=flat" alt="NPM version"></a> 
-    <a href="https://npmjs.com/package/ts-lib-template"><img src="https://img.shields.io/npm/dm/ts-lib-template.svg?style=flat" alt="NPM downloads"></a> 
-    <a href="https://circleci.com/gh/saojs/ts-lib-template"><img src="https://img.shields.io/circleci/project/saojs/ts-lib-template/master.svg?style=flat" alt="Build Status"></a> 
-</p>
+<div align="center">
 
-## Quick Start
+[![MIT licensed][license-badge]][license-url]
+[![Build Status][ci-badge]][ci-url]
+[![npm version][npm-badge]][npm-url]
+[![Code Coverage][code-coverage-badge]][code-coverage-url]
 
-1. Click "Use this template" at this repository.
-2. Rename all `ts-lib-template` to your package name.
-3. Commands:
+</div>
+
+# 🌍 Unport
+
+`Unport` is a Universal Port for cross JSContext communication with 100% type inference capabilities. Built to make communication between different JSContexts not only possible but easy and with robust typing. This is designed by [ULIVZ](https://github.com/ULIVZ) to bridge the gap between complex JSContext environments such as Node.js, Node.js Child Process, Webviews, Webworker, and iframes.
+
+## 🚀 The Problem and Our Solution
+In many development scenarios, we have multiple JSContexts that need to communicate with each other. These can be Node.js processes, Webviews, Web Workers, iframes, etc. Each of these JSContexts has its own way of communication, and lack of typing can make code maintenance quite difficult for complex cross JSContext communication scenarios.
+
+`Unport` strives to address these issues and provide a streamlined way to handle cross JSContext communication in three ways:
+
+1. ### Unified Port Paradigm:
+Unport uses a unified port paradigm for communication. We abstract the complexity behind a simple-to-use Port, making it easier for you to manage cross-JSContext communication.
+
+2. ### Robust Typing:
+With the power of TypeScript, Unport provides 100% type inference capability. You only need to focus on managing the communication types between different JSContexts. The rest of the complex work of ensuring typed communication is handled by Unport.
+
+## 🌈 Quick Start
+To install Unport, use the following command:
 
 ```bash
-npm run bootstrap   # install dependencies
-npm run clean       # clean dependencies
-npm run dev         # development both cjs and esm output
-npm run build       # build both cjs and esm
-npm run lint        # lint code
-npm run lint:fix    # fix all code lint errors
-npm run test        # run all tests
-npm run cov         # run all tests and generate coverage report
-npm run release     # release this package
+npm install unport
 ```
 
-## Features
+## 🍕 Examples
+ 
+You can find usage examples under the `/examples` folder of this repository.
 
-- TypeScript by default.
-- Output both `cjs` and `esm`.
-- Unit test with [jest](https://facebook.github.io/jest/).
-- Format code with [eslint](https://eslint.org/docs).
-- Fix and format code on each commit.
-- Leverage [quick-publish](https://github.com/ulivz/quick-publish) for release flow.
+## 📚 API Documentation
 
-## License
+Check out our comprehensive API documentation [here](url-to-your-documentation).
 
-MIT &copy; [ULIVZ](https://github.com/ulivz)
+## 👏 Contributing
+
+Contributions of any kind are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
+
+## 👥 Maintainers
+
+[@ULIVZ](https://github.com/ULIVZ)
+
+## 📜 License
+
+Unport is free and open-source software licensed under the [MIT License](./LICENSE).
+
+[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-url]: ./LICENSE
+[ci-badge]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml
+[npm-badge]: https://img.shields.io/npm/v/unport/latest?color=brightgreen
+[npm-url]: https://www.npmjs.com/package/unport
+[code-coverage-badge]: https://codecov.io/github/ULIVZ/unport/branch/main/graph/badge.svg
+[code-coverage-url]: https://codecov.io/gh/ULIVZ/unport
