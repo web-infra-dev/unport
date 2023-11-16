@@ -1,5 +1,6 @@
 <p align="center">
-  <img alt="Unport Logo" src="./.media/logo.png" width="400">
+  <img alt="Unport Logo" src="./.media/type-infer.png"><br>
+  <img alt="Unport Logo" src="./.media/logo.png" width="200">
 </p>
 
 <div align="center">
@@ -17,8 +18,6 @@ Unport is a Universal Port with strict type inference capability for cross-JSCon
 Unport is designed to solve the complexity of JSContext environments such as Node.js, Webview, subprocess, Web Worker, worker_threads, WebSocket, iframe, MessageChannel, ServiceWorker, etc. Each JSContext communicates with the outside world in different ways, and the lack of types makes the code for complex cross JSContext communication projects difficult. In complex large projects, it is often difficult to know where the message is going and what fields the recipient needs.
 
 ## 💡 Features
-
-<img alt="Unport Logo" src="./.media/type-infer.png">
 
 1. Provides a unified Port paradigm. You only need to define the message types that different JSContexts need to pass, and you will have a complete type of unified Port (Unport).
 2. 100% type inference. Users only need to maintain the types of communication between JSContexts, and leave the rest to unport.
