@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Unport Logo" src="./logo.png" width="400">
+  <img alt="Unport Logo" src="./.media/logo.png" width="400">
 </p>
 
 <div align="center">
@@ -18,9 +18,11 @@ Unport is designed to solve the complexity of JSContext environments such as Nod
 
 ## 💡 Features
 
+<img alt="Unport Logo" src="./.media/type-infer.png">
+
 1. Provides a unified Port paradigm. You only need to define the message types that different JSContexts need to pass, and you will have a complete type of unified Port (Unport).
 2. 100% type inference. Users only need to maintain the types of communication between JSContexts, and leave the rest to unport.
-3. Lightweight.
+3. Lightweight and succinct API.
 
 ## ⚡️ Quick Start
 
@@ -58,15 +60,15 @@ export type ParentPort = UnPort<Definition, 'parent'>;
 // parent.ts
 import { join } from 'path';
 import { fork } from 'child_process';
-import { UnPort, UnportChannelMessage } from 'unport';
+import { UnPort, UnportChannelMessage } from '../../src';
 import { ParentPort } from './port';
 
 // 1. Initialize a port
-const port: ParentPort = new UnPort();
+const parentPort: ParentPort = new UnPort();
 
 // 2. Implement a universal port based on underlying IPC capabilities
 const childProcess = fork(join(__dirname, './child.js'));
-port.implementChannel({
+parentPort.implementChannel({
   send(message) {
     childProcess.send(message);
   },
@@ -78,10 +80,10 @@ port.implementChannel({
 });
 
 // 3. Post and listen message
-port.postMessage('syn', { pid: 'parent' });
-port.onMessage('ack', payload => {
+parentPort.postMessage('syn', { pid: 'parent' });
+parentPort.onMessage('ack', payload => {
   console.log('[parent] [ack]', payload.pid);
-  port.postMessage('body', {
+  parentPort.postMessage('body', {
     name: 'index',
     path: ' /',
   });
@@ -93,14 +95,14 @@ port.onMessage('ack', payload => {
 
 ```ts
 // child.ts
-import { UnPort, UnportChannelMessage } from 'unport';
+import { UnPort, UnportChannelMessage } from '../../src';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
-const port: ChildPort = new UnPort();
+const childPort: ChildPort = new UnPort();
 
 // 2. Implement a unport channel based on underlying IPC capabilities
-port.implementChannel({
+childPort.implementChannel({
   send(message) {
     process.send && process.send(message);
   },
@@ -111,14 +113,14 @@ port.implementChannel({
   },
 });
 
-// 3. Post and listen message
-port.onMessage('syn', payload => {
-  console.log('[child] [syn]', payload.pid);
-  port.postMessage('ack', { pid: 'child' });
+childPort.onMessage('syn', () => {
+  childPort.postMessage('ack', { pid: 'child' });
 });
-port.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload));
+
+childPort.onMessage('body', payload => {
+  payload.
 });
+
 ```
 
 [npm-badge]: https://img.shields.io/npm/v/unport.svg?style=flat

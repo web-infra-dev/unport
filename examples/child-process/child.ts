@@ -2,10 +2,10 @@ import { UnPort, UnportChannelMessage } from '../../src';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
-const port: ChildPort = new UnPort();
+const childPort: ChildPort = new UnPort();
 
 // 2. Implement a unport channel based on underlying IPC capabilities
-port.implementChannel({
+childPort.implementChannel({
   send(message) {
     process.send && process.send(message);
   },
@@ -16,11 +16,10 @@ port.implementChannel({
   },
 });
 
-// 3. Post and listen message
-port.onMessage('syn', payload => {
-  console.log('[child] [syn]', payload.pid);
-  port.postMessage('ack', { pid: 'child' });
+childPort.onMessage('syn', () => {
+  childPort.postMessage('ack', { pid: 'child' });
 });
-port.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload));
+
+childPort.onMessage('body', payload => {
+  payload.
 });
