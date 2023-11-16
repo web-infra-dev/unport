@@ -124,6 +124,7 @@ interface Port<T extends MessageDefinition, D extends Direction<T>> {
 export interface UnportChannelMessage {
   t: string | number | symbol;
   p: any;
+  _$: 'un';
 }
 
 /**
@@ -153,16 +154,18 @@ export class UnPort<
     const handlers: Record<string | number | symbol, Callback<[any]>> = {};
 
     channel.accept(message => {
-      const { t, p } = message;
-      const handler = handlers[t];
-      if (handler) {
-        handler(p);
+      if (typeof message === 'object' && message._$ === 'un') {
+        const { t, p } = message;
+        const handler = handlers[t];
+        if (handler) {
+          handler(p);
+        }
       }
     });
 
     const port: Port<T, InferDirectionByPort<T, U>> = {
       postMessage(t, p) {
-        channel.send({ t, p });
+        channel.send({ t, p, _$: 'un' });
       },
       onMessage(t, handler) {
         handlers[t] = handler;
