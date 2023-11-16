@@ -1,13 +1,13 @@
 import { join } from 'path';
 import { fork } from 'child_process';
 import { UnPort } from '../../src';
-import { ParentPort } from './channel';
+import { ParentPort } from './port';
 
 // 1. Initialize a port
 const port: ParentPort = new UnPort();
 
 // 2. Implement a universal port based on underlying IPC capabilities
-const childProcess: import('child_process').ChildProcess = fork(join(__dirname, './child.js'));
+const childProcess = fork(join(__dirname, './child.js'));
 port.implementChannel({
   send(message) {
     childProcess.send(JSON.stringify(message));

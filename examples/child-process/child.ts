@@ -1,5 +1,5 @@
 import { UnPort } from '../../src';
-import { ChildPort } from './channel';
+import { ChildPort } from './port';
 
 // 1. Initialize a port
 const port: ChildPort = new UnPort();
