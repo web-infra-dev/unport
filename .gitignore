@@ -2,3 +2,7 @@ node_modules
 lib
 esm
 .DS_Store
+examples-compiled
+*.tsbuildinfo
+tsconfig.examples.tsbuildinfo
+tsconfig.tsbuildinfo

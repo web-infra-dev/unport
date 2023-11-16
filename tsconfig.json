@@ -14,6 +14,7 @@
     "noEmitOnError": false,
     "noImplicitThis": true,
     "noImplicitAny": true,
+    "rootDir": "src",
     "outDir": "./lib",
     "sourceMap": true,
     "target": "ES2019",
@@ -29,12 +30,9 @@
       "es5",
       "es6"
     ],
-    "paths": {
-      "unport": ["./src/index.ts"]
-    }
+    "composite": true
   },
   "include": [
-    "examples",
     "src",
     "types",
     "*.d.ts"
