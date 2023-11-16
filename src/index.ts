@@ -3,18 +3,6 @@
  * Copyright (c) ULIVZ. All Rights Reserved.
  */
 
-/* eslint-disable @typescript-eslint/no-namespace */
-
-export interface UnportChannelMessage {
-  t: string | number | symbol;
-  p: any;
-}
-
-export interface UnportChannel {
-  send(message: UnportChannelMessage): void;
-  accept(pipe: (message: UnportChannelMessage) => void): void;
-}
-
 /**
  * A template literal type that is used to describe the direction of message transmission.
  *
@@ -50,9 +38,9 @@ export type MessageDefinition4SingleJSContext = Record<string, any>;
  *
  * In this `Record` type, the composition is as follows:
  *
- * - Keys: These keys are represented by the {@type {MessageDirectionDescriptor}}, which describes
+ * - Keys: These keys are represented by the @type {MessageDirectionDescriptor}, which describes
  *         the direction of a message.
- * - Values: The values are of {@type {MessageDefinition4SingleJSContext}}
+ * - Values: The values are of @type {MessageDefinition4SingleJSContext}
  *
  * For example, a message definition could look like this:
  *
@@ -67,13 +55,30 @@ export type MessageDefinition4SingleJSContext = Record<string, any>;
  * }
  */
 export type MessageDefinition = Record<MessageDirectionDescriptor, MessageDefinition4SingleJSContext>;
-
+/**
+ * `Direction` type is a utility type to extract the direction field in a @type {MessageDefinition}.
+ * It narrows down the index signature of MessageDefinition to exclusively the direction field.
+ */
 export type Direction<T extends MessageDefinition> = keyof T;
-
-type InferPorts<T extends MessageDefinition> = {
+/**
+ * `InferPorts` type is a utility to infer the list of port names, given a @type {MessageDefinition}.
+ *
+ * It inspects the direction fields in the definition and extracts the unique port names
+ * present in them.
+ *
+ * For example, with following @type {MessageDefinition}: { "server2client": { ... } }
+ * The inferred ports will be 'server' | 'client'
+ */
+export type InferPorts<T extends MessageDefinition> = {
   [k in Direction<T>]: k extends `${infer A}2${infer B}` ? A | B : k;
 }[keyof T];
-
+/**
+ * `InferDirectionByPort` type is a utility to determine the direction of message transmission
+ * based on the port name.
+ *
+ * For example, with following @type {MessageDefinition}: { "server2client": { ... } }
+ * and port "client", the inferred direction will be 'client2server'
+ */
 type InferDirectionByPort<T extends MessageDefinition, U extends InferPorts<T>> =
   {
     [k in Direction<T>]: k extends `${infer A}2${infer B}`
@@ -81,15 +86,22 @@ type InferDirectionByPort<T extends MessageDefinition, U extends InferPorts<T>> 
         ? `${A}2${B}` :
         B extends U ? `${B}2${A}` : k : k;
   }[keyof T];
-
+/**
+ * Reverse direction
+ */
 type ReverseDirection<
   U extends MessageDefinition,
   T extends Direction<U>,
   Sep extends string = '2'
 > = T extends `${infer A}${Sep}${infer B}` ? `${B}${Sep}${A}` : T;
-
+/**
+ * `Payload` type is a utility to extract the payload type of a specific message, given its
+ * direction and the name.
+ */
 type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]> = T[D][U];
-
+/**
+ * `Callback` is a type representing a generic function
+ */
 type Callback<
   T extends unknown[] = [],
   U = unknown,
@@ -102,11 +114,33 @@ interface Port<T extends MessageDefinition, D extends Direction<T>> {
     handler: Callback<[Payload<T, ReverseDirection<T, D>, U>]>
   ): void;
 }
+/**
+ * `UnportChannelMessage` interface defines the structure of a message that can be sent
+ * or received through an `UnportChannel`.
+ *
+ * It contains a `t` field for the name of the message, and a `p` field for the payload
+ * of the message.
+ */
+export interface UnportChannelMessage {
+  t: string | number | symbol;
+  p: any;
+}
 
 /**
- * Port Adapter.
+ * `UnportChannel` interface specifies the methods that a valid unport channel should have.
+ *
+ * The `send` method takes a message conforming to @type {UnportChannelMessage} interface and sends
+ * it through the channel. The `accept` method sets a handler function that will be triggered
+ * whenever a message arrives at the channel.
  */
+export interface UnportChannel {
+  send(message: UnportChannelMessage): void;
+  accept(pipe: (message: UnportChannelMessage) => void): void;
+}
 
+/**
+ * Expose UnPort class
+ */
 export class UnPort<
   T extends MessageDefinition,
   U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
