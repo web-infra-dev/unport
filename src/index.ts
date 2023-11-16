@@ -11,8 +11,8 @@ export interface UnportChannelMessage {
 }
 
 export interface UnportChannel {
-  postMessage(message: UnportChannelMessage): void;
-  onmessage?: (message: UnportChannelMessage) => void;
+  send(message: UnportChannelMessage): void;
+  accept(pipe: (message: UnportChannelMessage) => void): void;
 }
 
 /**
@@ -96,7 +96,6 @@ type Callback<
 > = (...args: T) => U;
 
 interface Port<T extends MessageDefinition, D extends Direction<T>> {
-  implement?(implementation: () => UnportChannel): void;
   postMessage<U extends keyof T[D]>(t: U, p: Payload<T, D, U>): void;
   onMessage<U extends keyof T[ReverseDirection<T, D>]>(
     t: U,
@@ -108,58 +107,30 @@ interface Port<T extends MessageDefinition, D extends Direction<T>> {
  * Port Adapter.
  */
 
-export function defineUnportChannel(genericPort: UnportChannel) {
-  return genericPort;
-}
-
-export function buildPort<
-  T extends MessageDefinition,
-  U extends Direction<T>>(
-  adaptor: UnportChannel,
-): Port<T, U> {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  const handlers: Record<string | number | symbol, Function> = {};
-  adaptor.onmessage = function (msg: UnportChannelMessage) {
-    const { t, p } = msg;
-    const handler = handlers[t];
-    if (handler) {
-      handler(p);
-    }
-  };
-  const port: Port<T, U> = {
-    postMessage(t, p) {
-      adaptor.postMessage({ t, p });
-    },
-    onMessage(t, handler) {
-      handlers[t] = handler;
-    },
-  };
-  return port;
-}
-
 export class UnPort<
   T extends MessageDefinition,
   U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
-  implement(implementation: () => UnportChannel) {
-    const adaptor = implementation();
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    const handlers: Record<string | number | symbol, Function> = {};
-    adaptor.onmessage = (msg: UnportChannelMessage) => {
-      const { t, p } = msg;
+  implementChannel(channel: UnportChannel) {
+    const handlers: Record<string | number | symbol, Callback<[any]>> = {};
+
+    channel.accept(message => {
+      const { t, p } = message;
       const handler = handlers[t];
       if (handler) {
         handler(p);
       }
-    };
+    });
+
     const port: Port<T, InferDirectionByPort<T, U>> = {
       postMessage(t, p) {
-        adaptor.postMessage({ t, p });
+        channel.send({ t, p });
       },
       onMessage(t, handler) {
         handlers[t] = handler;
       },
     };
     Object.assign(this, port);
+    return this;
   }
 
   postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = () => {
