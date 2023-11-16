@@ -1,0 +1,6 @@
+node_modules
+__e2e__
+__fixtures__
+lib
+es
+dist
