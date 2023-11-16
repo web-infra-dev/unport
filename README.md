@@ -29,10 +29,9 @@ To implement a process of sending messages after a parent-child process is conne
 1. Define Message Definition:
 
 ```ts
-// channel.js
 import { UnPort } from 'unport';
 
-export type MessageDefinition = {
+export type Definition = {
   parent2child: {
     syn: {
       pid: string;
@@ -49,77 +48,77 @@ export type MessageDefinition = {
   };
 };
 
-export type ChildPort = UnPort<MessageDefinition, 'child2parent'>;
-export type ParentPort = UnPort<MessageDefinition, 'parent2child'>;
+export type ChildPort = UnPort<Definition, 'child'>;
+export type ParentPort = UnPort<Definition, 'parent'>;
 ```
 
 2. Parent process implementation:
 
 ```ts
-// parent.js
-import { defineIntermediatePort, UnPort } from 'unport';
-import { ChildPort } from './channel';
+// parent.ts
+import { join } from 'path';
+import { fork } from 'child_process';
+import { UnPort, UnportChannelMessage } from 'unport';
+import { ParentPort } from './port';
 
 // 1. Initialize a port
-const port: ChildPort = new UnPort();
+const port: ParentPort = new UnPort();
 
-// 2. Implement a intermediate port based on underlying IPC capabilities
-port.implement(() => {
-  const intermediatePort = defineIntermediatePort({
-    postMessage: message => {
-      process.send && process.send(JSON.stringify(message));
-    },
+// 2. Implement a universal port based on underlying IPC capabilities
+const childProcess = fork(join(__dirname, './child.js'));
+port.implementChannel({
+  send(message) {
+    childProcess.send(message);
+  },
+  accept(pipe) {
+    childProcess.on('message', (message: UnportChannelMessage) => {
+      pipe(message);
+    });
+  },
+});
+
+// 3. Post and listen message
+port.postMessage('syn', { pid: 'parent' });
+port.onMessage('ack', payload => {
+  console.log('[parent] [ack]', payload.pid);
+  port.postMessage('body', {
+    name: 'index',
+    path: ' /',
   });
-
-  process.on('message', (message: string) => {
-    intermediatePort.onmessage && intermediatePort.onmessage(JSON.parse(message));
-  });
-  return intermediatePort;
 });
 
-// 3. Post message
-port.onMessage('syn', payload => {
-  console.log('[child] [syn]', payload.pid);
-  port.postMessage('ack', { pid: 'child' });
-});
-port.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload.name));
-});
 ```
 
 3. Child process implementation:
 
 ```ts
-// child.js
-import { defineIntermediatePort, UnPort } from 'unport';
-import { ChildPort } from './channel';
+// child.ts
+import { UnPort, UnportChannelMessage } from 'unport';
+import { ChildPort } from './port';
 
 // 1. Initialize a port
 const port: ChildPort = new UnPort();
 
-// 2. Implement a intermediate port based on underlying IPC capabilities
-port.implement(() => {
-  const intermediatePort = defineIntermediatePort({
-    postMessage: message => {
-      process.send && process.send(JSON.stringify(message));
-    },
-  });
-
-  process.on('message', (message: string) => {
-    intermediatePort.onmessage && intermediatePort.onmessage(JSON.parse(message));
-  });
-  return intermediatePort;
+// 2. Implement a unport channel based on underlying IPC capabilities
+port.implementChannel({
+  send(message) {
+    process.send && process.send(message);
+  },
+  accept(pipe) {
+    process.on('message', (message: UnportChannelMessage) => {
+      pipe(message);
+    });
+  },
 });
 
-// 3. Post message
+// 3. Post and listen message
 port.onMessage('syn', payload => {
   console.log('[child] [syn]', payload.pid);
   port.postMessage('ack', { pid: 'child' });
 });
 port.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload.name));
+  console.log('[child] [body]', JSON.stringify(payload));
 });
-
 ```
 
 [npm-badge]: https://img.shields.io/npm/v/unport.svg?style=flat

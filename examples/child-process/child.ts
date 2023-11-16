@@ -16,7 +16,7 @@ port.implementChannel({
   },
 });
 
-// 3. Post message
+// 3. Post and listen message
 port.onMessage('syn', payload => {
   console.log('[child] [syn]', payload.pid);
   port.postMessage('ack', { pid: 'child' });
