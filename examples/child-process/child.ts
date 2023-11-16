@@ -1,21 +1,21 @@
-import { defineIntermediatePort, UnPort } from '../../src';
+import { defineUnportChannel, UnPort } from '../../src';
 import { ChildPort } from './channel';
 
 // 1. Initialize a port
 const port: ChildPort = new UnPort();
 
-// 2. Implement a intermediate port based on underlying IPC capabilities
+// 2. Implement a unport channel based on underlying IPC capabilities
 port.implement(() => {
-  const intermediatePort = defineIntermediatePort({
+  const channel = defineUnportChannel({
     postMessage: message => {
       process.send && process.send(JSON.stringify(message));
     },
   });
 
   process.on('message', (message: string) => {
-    intermediatePort.onmessage && intermediatePort.onmessage(JSON.parse(message));
+    channel.onmessage && channel.onmessage(JSON.parse(message));
   });
-  return intermediatePort;
+  return channel;
 });
 
 // 3. Post message
