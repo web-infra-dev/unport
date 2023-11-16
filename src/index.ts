@@ -67,26 +67,35 @@ export type MessageDefinition4SingleJSContext = Record<string, any>;
  * }
  */
 export type MessageDefinition = Record<MessageDirectionDescriptor, MessageDefinition4SingleJSContext>;
+
 export type Direction<T extends MessageDefinition> = keyof T;
-export type GetPorts<T extends MessageDefinition> = {
-  [k in keyof T]: k extends `${infer A}2${infer B}` ? A | B : k;
+
+type InferPorts<T extends MessageDefinition> = {
+  [k in Direction<T>]: k extends `${infer A}2${infer B}` ? A | B : k;
 }[keyof T];
 
-export type Ports = GetPorts<MessageDefinition>;
-export type ReverseDirection<
+type InferDirectionByPort<T extends MessageDefinition, U extends InferPorts<T>> =
+  {
+    [k in Direction<T>]: k extends `${infer A}2${infer B}`
+      ? A extends U
+        ? `${A}2${B}` :
+        B extends U ? `${B}2${A}` : k : k;
+  }[keyof T];
+
+type ReverseDirection<
   U extends MessageDefinition,
   T extends Direction<U>,
   Sep extends string = '2'
 > = T extends `${infer A}${Sep}${infer B}` ? `${B}${Sep}${A}` : T;
 
-export type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]> = T[D][U];
+type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]> = T[D][U];
 
-export type Callback<
+type Callback<
   T extends unknown[] = [],
   U = unknown,
 > = (...args: T) => U;
 
-export interface Port<T extends MessageDefinition, D extends Direction<T>> {
+interface Port<T extends MessageDefinition, D extends Direction<T>> {
   implement?(implementation: () => UnportChannel): void;
   postMessage<U extends keyof T[D]>(t: U, p: Payload<T, D, U>): void;
   onMessage<U extends keyof T[ReverseDirection<T, D>]>(
@@ -130,7 +139,7 @@ export function buildPort<
 
 export class UnPort<
   T extends MessageDefinition,
-  U extends Direction<T>> implements Port<T, U> {
+  U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
   implement(implementation: () => UnportChannel) {
     const adaptor = implementation();
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -142,7 +151,7 @@ export class UnPort<
         handler(p);
       }
     };
-    const port: Port<T, U> = {
+    const port: Port<T, InferDirectionByPort<T, U>> = {
       postMessage(t, p) {
         adaptor.postMessage({ t, p });
       },
@@ -153,11 +162,11 @@ export class UnPort<
     Object.assign(this, port);
   }
 
-  postMessage: Port<T, U>['postMessage'] = () => {
+  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = () => {
     throw new Error('missing implementation');
   }
 
-  onMessage: Port<T, U>['onMessage'] = () => {
+  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = () => {
     throw new Error('missing implementation');
   }
 }

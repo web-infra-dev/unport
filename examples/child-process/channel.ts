@@ -17,5 +17,5 @@ export type ChildProcessChannel = {
   };
 };
 
-export type ChildPort = UnPort<ChildProcessChannel, 'child2parent'>;
-export type ParentPort = UnPort<ChildProcessChannel, 'parent2child'>;
+export type ChildPort = UnPort<ChildProcessChannel, 'child'>;
+export type ParentPort = UnPort<ChildProcessChannel, 'parent'>;
