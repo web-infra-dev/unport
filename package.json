@@ -38,6 +38,7 @@
   "packageManager": "pnpm@8.7.0",
   "devDependencies": {
     "@types/node": "18.7.6",
+    "@vitest/coverage-v8": "^0.34.6",
     "eslint": "7",
     "eslint-config-typescript-library": "0.2.4",
     "npm-run-all": "4.1.5",
