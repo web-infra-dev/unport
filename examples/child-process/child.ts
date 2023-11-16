@@ -16,10 +16,11 @@ childPort.implementChannel({
   },
 });
 
-childPort.onMessage('syn', () => {
+childPort.onMessage('syn', payload => {
+  console.log('[child] [syn]', payload.pid);
   childPort.postMessage('ack', { pid: 'child' });
 });
 
 childPort.onMessage('body', payload => {
-  payload.
+  console.log('[child] [body]', JSON.stringify(payload));
 });
