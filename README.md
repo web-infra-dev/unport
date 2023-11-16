@@ -10,7 +10,7 @@
 
 </div>
 
-## ⚓ Unport
+## 🛰️ Unport
 
 Unport is a Universal Port with strict type inference capability for cross-JSContext communication.
 
@@ -125,7 +125,7 @@ childPort.onMessage('body', payload => {
 
 [npm-badge]: https://img.shields.io/npm/v/unport.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/unport
-[ci-badge]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml/badge.svg?event=push&branch=main
-[ci-url]: https://github.com/ULIVZ/unport/actions/workflows/ci.yml?query=event%3Apush+branch%3Amain
+[ci-badge]: https://github.com/ulivz/unport/actions/workflows/ci.yml/badge.svg?event=push&branch=main
+[ci-url]: https://github.com/ulivz/unport/actions/workflows/ci.yml?query=event%3Apush+branch%3Amain
 [code-coverage-badge]: https://codecov.io/github/ULIVZ/unport/branch/main/graph/badge.svg
 [code-coverage-url]: https://codecov.io/gh/ULIVZ/unport
