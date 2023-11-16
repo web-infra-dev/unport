@@ -82,7 +82,7 @@ export type ParentPort = UnPort<Definition, 'parent'>;
 // parent.ts
 import { join } from 'path';
 import { fork } from 'child_process';
-import { UnPort, UnportChannelMessage } from '../../src';
+import { UnPort, UnportChannelMessage } from 'unport';
 import { ParentPort } from './port';
 
 // 1. Initialize a port
@@ -117,7 +117,7 @@ parentPort.onMessage('ack', payload => {
 
 ```ts
 // child.ts
-import { UnPort, UnportChannelMessage } from '../../src';
+import { UnPort, UnportChannelMessage } from 'unport';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
@@ -135,12 +135,13 @@ childPort.implementChannel({
   },
 });
 
-childPort.onMessage('syn', () => {
+childPort.onMessage('syn', payload => {
+  console.log('[child] [syn]', payload.pid);
   childPort.postMessage('ack', { pid: 'child' });
 });
 
 childPort.onMessage('body', payload => {
-  payload.
+  console.log('[child] [body]', JSON.stringify(payload));
 });
 ```
 

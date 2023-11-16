@@ -30,7 +30,10 @@
       "es5",
       "es6"
     ],
-    "composite": true
+    "composite": true,
+    "paths": {
+      "unport": ["./src/index.ts"]
+    }
   },
   "include": [
     "src",
