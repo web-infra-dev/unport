@@ -1,6 +1,6 @@
 {
-  "name": "ts-lib-template",
-  "description": "Default Template",
+  "name": "unport",
+  "description": "Unport - a Universal Port with strict type inference capability for cross-JSContext communication.",
   "version": "0.0.0",
   "main": "lib/index.js",
   "module": "esm/index.js",

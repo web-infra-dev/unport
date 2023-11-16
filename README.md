@@ -12,7 +12,7 @@
 
 ## ⚓ Unport
 
-Unport is a Universal Port with 100% type inference capability for cross JSContext communication.
+Unport is a Universal Port with strict type inference capability for cross-JSContext communication.
 
 Unport is designed to solve the complexity of JSContext environments such as Node.js, Webview, subprocess, Web Worker, worker_threads, WebSocket, iframe, MessageChannel, ServiceWorker, etc. Each JSContext communicates with the outside world in different ways, and the lack of types makes the code for complex cross JSContext communication projects difficult. In complex large projects, it is often difficult to know where the message is going and what fields the recipient needs.
 
