@@ -1,6 +1,6 @@
 import { UnPort } from '../../src';
 
-export type ChildProcessChannel = {
+export type Definition = {
   parent2child: {
     syn: {
       pid: string;
@@ -17,5 +17,5 @@ export type ChildProcessChannel = {
   };
 };
 
-export type ChildPort = UnPort<ChildProcessChannel, 'child'>;
-export type ParentPort = UnPort<ChildProcessChannel, 'parent'>;
+export type ChildPort = UnPort<Definition, 'child'>;
+export type ParentPort = UnPort<Definition, 'parent'>;
