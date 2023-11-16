@@ -1,4 +1,4 @@
-import { UnPort } from '../../src';
+import { UnPort, UnportChannelMessage } from '../../src';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
@@ -7,11 +7,11 @@ const port: ChildPort = new UnPort();
 // 2. Implement a unport channel based on underlying IPC capabilities
 port.implementChannel({
   send(message) {
-    process.send && process.send(JSON.stringify(message));
+    process.send && process.send(message);
   },
   accept(pipe) {
-    process.on('message', (message: string) => {
-      pipe(JSON.parse(message));
+    process.on('message', (message: UnportChannelMessage) => {
+      pipe(message);
     });
   },
 });
