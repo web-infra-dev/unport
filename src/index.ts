@@ -153,7 +153,6 @@ export class Unport<
   implementChannel(channel: UnportChannel | (() => UnportChannel)) {
     this.channel = typeof channel === 'function' ? channel() : channel;
     this.channel.accept(message => {
-      console.log('message', message);
       if (typeof message === 'object' && message._$ === 'un') {
         const { t, p } = message;
         const handler = this.handlers[t];
