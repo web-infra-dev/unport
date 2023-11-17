@@ -5,7 +5,7 @@ import { ClientPort } from './port';
 // 1. Initialize a port
 const clientPort: ClientPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 const socket = io('http://localhost:10101/');
 socket.on('connect', () => {
   clientPort.implementChannel(() => ({

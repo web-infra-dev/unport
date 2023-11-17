@@ -1,16 +1,16 @@
-import { Unport, UnportChannelMessage } from '../../src';
+import { Unport, ChannelMessage } from '../../src';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
 const childPort: ChildPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 childPort.implementChannel({
   send(message) {
     process.send && process.send(message);
   },
   accept(pipe) {
-    process.on('message', (message: UnportChannelMessage) => {
+    process.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },

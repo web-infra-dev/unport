@@ -11,11 +11,11 @@
 
 ## 🛰️ What's Unport?
 
-Unport is a Universal Port with strict type inference capability for cross-JSContext communication.
+**Unport is a fully type-inferred IPC (Inter-Process Communication) library**. It ensures robust and reliable cross-context communication with strict type checking, enhancing the predictability and stability of your application.
 
-Unport emerges as a well-architected solution, meticulously designed to simplify the complexity revolving around various JSContext environments. These environments encompass a wide range of technologies, including [Node.js](https://nodejs.org/), [ChildProcess](https://nodejs.org/api/child_process.html), [Webview](https://en.wikipedia.org/wiki/WebView), [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [worker_threads](https://nodejs.org/api/worker_threads.html), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe), [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel), [ServiceWorker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), and much more.
+Unport is  designed to simplify the complexity revolving around various JSContext environments. These environments encompass a wide range of technologies, including [Node.js](https://nodejs.org/), [ChildProcess](https://nodejs.org/api/child_process.html), [Webview](https://en.wikipedia.org/wiki/WebView), [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [worker_threads](https://nodejs.org/api/worker_threads.html), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe), [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel), [ServiceWorker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), and much more.
 
-Each of these JSContext environments exhibits distinct methods of communicating with the external world. Still, the lack of defined types can make handling the code for complex projects an arduous task. In the context of intricate and large-scale projects, it's often challenging to track the message's trajectory and comprehend the fields that the recipient necessitates. 
+Each of these JSContexts exhibits distinct methods of communicating with the external world. Still, the lack of defined types can make handling the code for complex projects an arduous task. In the context of intricate and large-scale projects, it's often challenging to track the message's trajectory and comprehend the fields that the recipient necessitates.
 
 - [🛰️ What's Unport?](#️-whats-unport)
 - [💡 Features](#-features)
@@ -23,14 +23,14 @@ Each of these JSContext environments exhibits distinct methods of communicating 
 - [⚡️ Quick Start](#️-quick-start)
 - [📖 Basic Concepts](#-basic-concepts)
   - [MessageDefinition](#messagedefinition)
-  - [UnportChannel](#unportchannel)
+  - [Channel](#channel)
 - [📚 API Reference](#-api-reference)
   - [Unport](#unport)
     - [.implementChannel()](#implementchannel)
     - [.postMessage()](#postmessage)
     - [.onMessage()](#onmessage)
     - [.pipe()](#pipe)
-  - [UnportChannelMessage](#unportchannelmessage)
+  - [ChannelMessage](#channelmessage)
 - [🤝 Contributing](#-contributing)
 - [🤝 Credits](#-credits)
 - [LICENSE](#license)
@@ -38,7 +38,7 @@ Each of these JSContext environments exhibits distinct methods of communicating 
 
 ## 💡 Features
 
-1. Provides a unified Port paradigm. You only need to define the message types ([MessageDefinition](#messagedefinition)) and Intermediate communication channel ([UnportChannel](#unportchannel)) that different JSContexts need to pass, and you will get a unified type of Port:
+1. Provides a unified Port paradigm. You only need to define the message types ([MessageDefinition](#messagedefinition)) and Intermediate communication channel ([Channel](#channel)) that different JSContexts need to pass, and you will get a unified type of Port:
 2. 100% type inference. Users only need to maintain the message types between JSContexts, and leave the rest to unport.
 3. Lightweight size and succinct API.
 
@@ -87,20 +87,20 @@ export type ParentPort = Unport<Definition, 'parent'>;
 // parent.ts
 import { join } from 'path';
 import { fork } from 'child_process';
-import { Unport, UnportChannelMessage } from 'unport';
+import { Unport, ChannelMessage } from 'unport';
 import { ParentPort } from './port';
 
 // 1. Initialize a port
 const parentPort: ParentPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 const childProcess = fork(join(__dirname, './child.js'));
 parentPort.implementChannel({
   send(message) {
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: UnportChannelMessage) => {
+    childProcess.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -121,19 +121,19 @@ parentPort.onMessage('ack', payload => {
 
 ```ts
 // child.ts
-import { Unport, UnportChannelMessage } from 'unport';
+import { Unport, ChannelMessage } from 'unport';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
 const childPort: ChildPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 childPort.implementChannel({
   send(message) {
     process.send && process.send(message);
   },
   accept(pipe) {
-    process.on('message', (message: UnportChannelMessage) => {
+    process.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -154,7 +154,7 @@ childPort.onMessage('body', payload => {
 
 ### MessageDefinition
 
-In Unport, a `MessageDefinition` is a crucial concept that defines the structure of the messages that can be sent and received through a `UnportChannel`. It provides a clear and consistent way to specify the data that can be communicated between different JSContexts
+In Unport, a `MessageDefinition` is a crucial concept that defines the structure of the messages that can be sent and received through a `Channel`. It provides a clear and consistent way to specify the data that can be communicated between different JSContexts
 
 A `MessageDefinition` is an object where each key represents a type of message that can be sent or received, and the value is an object that defines the structure of the message.
 
@@ -181,19 +181,19 @@ export type Definition = {
 
 In this example, the `MessageDefinition` defines two types of messages that can be sent from the parent to the child (`syn` and `body`), and one type of message that can be sent from the child to the parent (`ack`). Each message type has its own structure, defined by an object with keys representing message types and values representing their message types.
 
-By using a `MessageDefinition`, you can ensure that the messages sent and received through a `UnportChannel` are consistent and predictable, making your code easier to understand and maintain.
+By using a `MessageDefinition`, you can ensure that the messages sent and received through a `Channel` are consistent and predictable, making your code easier to understand and maintain.
 
-### UnportChannel
+### Channel
 
-In Unport, a `UnportChannel` is a fundamental concept that represents a communication pathway between different JavaScript contexts. It provides a unified interface for sending and receiving messages across different environments.
+In Unport, a `Channel` is a fundamental concept that represents a Intermediate communication pathway between different JavaScript contexts. It provides a unified interface for sending and receiving messages across different environments.
 
-A `UnportChannel` is implemented using two primary methods:
+A `Channel` is implemented using two primary methods:
 
 - `send(message)`: This method is used to send a message through the channel. The `message` parameter is the data you want to send.
 
 - `accept(pipe)`: This method is used to accept incoming messages from the channel. The `pipe` parameter is a function that takes a message as its argument.
 
-Here is an example of how to implement a `UnportChannel`:
+Here is an example of how to implement a `Channel`:
 
 ```ts
 parentPort.implementChannel({
@@ -201,7 +201,7 @@ parentPort.implementChannel({
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: UnportChannelMessage) => {
+    childProcess.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -232,7 +232,7 @@ parentPort.implementChannel({
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: UnportChannelMessage) => {
+    childProcess.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -263,7 +263,7 @@ parentPort.onMessage('ack', payload => {
 
 #### .pipe()
 
-- Type: `(message: UnportChannelMessage) => void`
+- Type: `(message: ChannelMessage) => void`
 
 The `pipe` method is used to manually handle incoming messages. It's often used in Server with `one-to-many` connections, e.g. Web Socket.
 
@@ -282,12 +282,12 @@ channel.pipe(message);
 
 See our [Web Socket](./examples/web-socket/) example to check more details.
 
-### UnportChannelMessage
+### ChannelMessage
 
-The `UnportChannelMessage` type is used for the message in the `onMessage` method.
+The `ChannelMessage` type is used for the message in the `onMessage` method.
 
 ```ts
-import { UnportChannelMessage } from 'unport';
+import { ChannelMessage } from 'unport';
 ```
 
 ## 🤝 Contributing

@@ -1,19 +1,19 @@
 import { join } from 'path';
 import { fork } from 'child_process';
-import { Unport, UnportChannelMessage } from '../../src';
+import { Unport, ChannelMessage } from '../../src';
 import { ParentPort } from './port';
 
 // 1. Initialize a port
 const parentPort: ParentPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 const childProcess = fork(join(__dirname, './child.js'));
 parentPort.implementChannel({
   send(message) {
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: UnportChannelMessage) => {
+    childProcess.on('message', (message: ChannelMessage) => {
       pipe(message);
     });
   },

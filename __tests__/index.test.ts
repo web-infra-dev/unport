@@ -1,5 +1,5 @@
 import { describe, test, beforeEach, vi, expect } from 'vitest';
-import { Unport, UnportChannel } from '../src';
+import { Unport, Channel } from '../src';
 
 export type Definition = {
   parent2child: {
@@ -22,7 +22,7 @@ export type ChildPort = Unport<Definition, 'child'>;
 export type ParentPort = Unport<Definition, 'parent'>;
 
 describe('Unport', () => {
-  let mockChannel: UnportChannel;
+  let mockChannel: Channel;
   let unPort: ParentPort;
 
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('Unport', () => {
   });
 
   test('should throw error when provided invalid channel function', () => {
-    const invalidChannelFn = () => ({} as UnportChannel); // Does not contain required 'send' method
+    const invalidChannelFn = () => ({} as Channel); // Does not contain required 'send' method
     expect(() => unPort.implementChannel(invalidChannelFn)).toThrowError(
       '[1] invalid channel implementation',
     );

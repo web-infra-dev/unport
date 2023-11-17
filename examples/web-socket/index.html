@@ -50,7 +50,7 @@
       const clientPort = new Unport();
       const socket = io("http://localhost:10101/");
 
-      // 2. Implement a UnportChannel based on underlying Socket.IO
+      // 2. Implement a Channel based on underlying Socket.IO
       socket.on("connect", () => {
         clientPort.implementChannel(() => ({
           send: function (message) {

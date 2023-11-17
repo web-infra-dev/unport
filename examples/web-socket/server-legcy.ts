@@ -12,7 +12,7 @@ import { Unport } from '../../src';
 // 1. Initialize a port map
 const socketPorts: Map<string, ServerPort> = new Map();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 const server = createServer();
 const io = new SocketServer(server, {
   cors: {

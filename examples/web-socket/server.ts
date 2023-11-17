@@ -6,7 +6,7 @@ import { Unport } from '../../src';
 // 1. Initialize a port
 const serverPort: ServerPort = new Unport();
 
-// 2. Implement a UnportChannel based on underlying IPC capabilities
+// 2. Implement a Channel based on underlying IPC capabilities
 const server = createServer();
 const io = new SocketServer(server, {
   cors: {

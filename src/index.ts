@@ -114,34 +114,34 @@ interface Port<T extends MessageDefinition, D extends Direction<T>> {
   ): void;
 }
 /**
- * `UnportChannelMessage` interface defines the structure of a message that can be sent
- * or received through an `UnportChannel`.
+ * `ChannelMessage` interface defines the structure of a message that can be sent
+ * or received through an `Channel`.
  *
  * It contains a `t` field for the name of the message, and a `p` field for the payload
  * of the message.
  */
-export interface UnportChannelMessage {
+export interface ChannelMessage {
   t: string | number | symbol;
   p: any;
   _$: 'un';
 }
 
 /**
- * `UnportChannel` interface specifies the methods that a valid unport channel should have.
+ * `Channel` interface specifies the methods that a valid unport channel should have.
  *
- * The `send` method takes a message conforming to @type {UnportChannelMessage} interface and sends
+ * The `send` method takes a message conforming to @type {ChannelMessage} interface and sends
  * it through the channel. The `accept` method sets a handler function that will be triggered
  * whenever a message arrives at the channel.
  */
-export interface UnportChannel {
-  send(message: UnportChannelMessage): void;
-  accept?(pipe: (message: UnportChannelMessage) => unknown): void;
+export interface Channel {
+  send(message: ChannelMessage): void;
+  accept?(pipe: (message: ChannelMessage) => unknown): void;
   destroy?(): void;
-  pipe?(message: UnportChannelMessage): unknown;
+  pipe?(message: ChannelMessage): unknown;
 }
 
-export interface EnhancedChannel extends UnportChannel {
-  pipe(message: UnportChannelMessage): unknown;
+export interface EnhancedChannel extends Channel {
+  pipe(message: ChannelMessage): unknown;
 }
 
 /**
@@ -153,11 +153,11 @@ implements Port<T, InferDirectionByPort<T, U>> {
 
   public channel?: EnhancedChannel;
 
-  implementChannel(channel: UnportChannel | (() => UnportChannel)): EnhancedChannel {
+  implementChannel(channel: Channel | (() => Channel)): EnhancedChannel {
     // @ts-expect-error We will assign it immediately
     this.channel = typeof channel === 'function' ? channel() : channel;
     if (typeof this.channel === 'object' && typeof this.channel.send === 'function') {
-      this.channel.pipe = (message: UnportChannelMessage) => {
+      this.channel.pipe = (message: ChannelMessage) => {
         if (typeof message === 'object' && message._$ === 'un') {
           const { t, p } = message;
           const handler = this.handlers[t];
