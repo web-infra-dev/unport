@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/ulivz/unport/compare/v0.3.1...v0.5.0) (2023-11-17)
+
+
+### Features
+
+* support manual `channel.pipe` ([#2](https://github.com/ulivz/unport/issues/2)) ([b8ef448](https://github.com/ulivz/unport/commit/b8ef4482088e994eef37823a6991a67a93c5c77c))
+
+
+
 # [0.4.0](https://github.com/ulivz/unport/compare/v0.3.1...v0.4.0) (2023-11-17)
 
 
