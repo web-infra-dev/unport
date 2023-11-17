@@ -25,7 +25,7 @@ Unport is designed to solve the complexity of JSContext environments such as [No
   - [MessageDefinition](#messagedefinition)
   - [UnportChannel](#unportchannel)
 - [📚 API Reference](#-api-reference)
-  - [UnPort](#unport)
+  - [Unport](#unport)
     - [.implementChannel()](#implementchannel)
     - [.postMessage()](#postmessage)
     - [.onMessage()](#onmessage)
@@ -53,7 +53,7 @@ Let's take ChildProcess as an example to implement a process of sending messages
 1. Define Message Definition:
 
 ```ts
-import { UnPort } from 'unport';
+import { Unport } from 'unport';
 
 export type Definition = {
   parent2child: {
@@ -72,8 +72,8 @@ export type Definition = {
   };
 };
 
-export type ChildPort = UnPort<Definition, 'child'>;
-export type ParentPort = UnPort<Definition, 'parent'>;
+export type ChildPort = Unport<Definition, 'child'>;
+export type ParentPort = Unport<Definition, 'parent'>;
 ```
 
 2. Parent process implementation:
@@ -82,11 +82,11 @@ export type ParentPort = UnPort<Definition, 'parent'>;
 // parent.ts
 import { join } from 'path';
 import { fork } from 'child_process';
-import { UnPort, UnportChannelMessage } from 'unport';
+import { Unport, UnportChannelMessage } from 'unport';
 import { ParentPort } from './port';
 
 // 1. Initialize a port
-const parentPort: ParentPort = new UnPort();
+const parentPort: ParentPort = new Unport();
 
 // 2. Implement a universal port based on underlying IPC capabilities
 const childProcess = fork(join(__dirname, './child.js'));
@@ -117,11 +117,11 @@ parentPort.onMessage('ack', payload => {
 
 ```ts
 // child.ts
-import { UnPort, UnportChannelMessage } from 'unport';
+import { Unport, UnportChannelMessage } from 'unport';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
-const childPort: ChildPort = new UnPort();
+const childPort: ChildPort = new Unport();
 
 // 2. Implement a unport channel based on underlying IPC capabilities
 childPort.implementChannel({
@@ -209,12 +209,12 @@ By abstracting the details of the underlying communication mechanism, Unport all
 
 ## 📚 API Reference
 
-### UnPort
+### Unport
 
-The `UnPort` class is used to create a new port.
+The `Unport` class is used to create a new port.
 
 ```ts
-import { UnPort } from 'unport';
+import { Unport } from 'unport';
 ```
 
 #### .implementChannel()

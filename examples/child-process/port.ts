@@ -1,4 +1,4 @@
-import { UnPort } from '../../src';
+import { Unport } from '../../src';
 
 export type Definition = {
   parent2child: {
@@ -17,5 +17,5 @@ export type Definition = {
   };
 };
 
-export type ChildPort = UnPort<Definition, 'child'>;
-export type ParentPort = UnPort<Definition, 'parent'>;
+export type ChildPort = Unport<Definition, 'child'>;
+export type ParentPort = Unport<Definition, 'parent'>;

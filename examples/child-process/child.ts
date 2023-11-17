@@ -1,8 +1,8 @@
-import { UnPort, UnportChannelMessage } from '../../src';
+import { Unport, UnportChannelMessage } from '../../src';
 import { ChildPort } from './port';
 
 // 1. Initialize a port
-const childPort: ChildPort = new UnPort();
+const childPort: ChildPort = new Unport();
 
 // 2. Implement a unport channel based on underlying IPC capabilities
 childPort.implementChannel({

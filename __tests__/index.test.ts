@@ -1,5 +1,5 @@
 import { describe, test, beforeEach, vi, expect } from 'vitest';
-import { UnPort, UnportChannel } from '../src';
+import { Unport, UnportChannel } from '../src';
 
 export type Definition = {
   parent2child: {
@@ -18,10 +18,10 @@ export type Definition = {
   };
 };
 
-export type ChildPort = UnPort<Definition, 'child'>;
-export type ParentPort = UnPort<Definition, 'parent'>;
+export type ChildPort = Unport<Definition, 'child'>;
+export type ParentPort = Unport<Definition, 'parent'>;
 
-describe('UnPort', () => {
+describe('Unport', () => {
   let mockChannel: UnportChannel;
   let unPort: ParentPort;
 
@@ -32,7 +32,7 @@ describe('UnPort', () => {
       accept: vi.fn().mockImplementation(function (pipe) { this.mockReceiveMessage = pipe; }),
     };
 
-    unPort = new UnPort<Definition, 'parent'>().implementChannel(mockChannel);
+    unPort = new Unport<Definition, 'parent'>().implementChannel(mockChannel);
   });
 
   test('should correctly call channel send method', () => {

@@ -140,14 +140,14 @@ export interface UnportChannel {
 }
 
 /**
- * Expose UnPort class
+ * Expose Unport class
  */
 
 const missingChannelImplementation = () => {
   throw new Error('missing channel implementation');
 };
 
-export class UnPort<
+export class Unport<
   T extends MessageDefinition,
   U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
   implementChannel(channel: UnportChannel) {
