@@ -31,6 +31,7 @@ Unport is designed to solve the complexity of JSContext environments such as [No
     - [.onMessage()](#onmessage)
   - [UnportChannelMessage](#unportchannelmessage)
 - [🤝 Contributing](#-contributing)
+- [🤝 Credits](#-credits)
 - [LICENSE](#license)
 
 
@@ -39,6 +40,8 @@ Unport is designed to solve the complexity of JSContext environments such as [No
 1. Provides a unified Port paradigm. You only need to define the message types that different JSContexts need to pass, and you will have a complete type of unified Port (Unport).
 2. 100% type inference. Users only need to maintain the types of communication between JSContexts, and leave the rest to unport.
 3. Lightweight and succinct API.
+
+
 
 ## 🛠️ Install
 
@@ -274,6 +277,10 @@ Here are some ways you can contribute:
 3. 📖 Improve documentation or write tutorials to help other users.
 4. 🌐 Translate the documentation to other languages.
 5. 💻 Contribute code changes by [Forking the Repository](https://github.com/ulivz/unport/fork), making changes, and submitting a Pull Request.
+
+## 🤝 Credits
+
+The birth of this project is inseparable from the complex IPC problems we encountered when working in large companies. The previous name of this project was `Multidirectional Typed Port`, and we would like to thank [ahaoboy](https://github.com/ahaoboy) for his previous ideas on this matter.
 
 
 ## LICENSE
