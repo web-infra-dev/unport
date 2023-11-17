@@ -137,45 +137,52 @@ export interface UnportChannelMessage {
 export interface UnportChannel {
   send(message: UnportChannelMessage): void;
   accept(pipe: (message: UnportChannelMessage) => void): void;
+  destroy?(): void;
 }
 
 /**
  * Expose Unport class
  */
-
-const missingChannelImplementation = () => {
-  throw new Error('missing channel implementation');
-};
-
 export class Unport<
   T extends MessageDefinition,
   U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
-  implementChannel(channel: UnportChannel) {
-    const handlers: Record<string | number | symbol, Callback<[any]>> = {};
+  private handlers: Record<string | number | symbol, Callback<[any]>[]> = {};
 
-    channel.accept(message => {
+  private channel?: UnportChannel;
+
+  implementChannel(channel: UnportChannel | (() => UnportChannel)) {
+    this.channel = typeof channel === 'function' ? channel() : channel;
+    this.channel.accept(message => {
+      console.log('message', message);
       if (typeof message === 'object' && message._$ === 'un') {
         const { t, p } = message;
-        const handler = handlers[t];
+        const handler = this.handlers[t];
         if (handler) {
-          handler(p);
+          handler.forEach(fn => fn(p));
         }
       }
     });
 
-    const port: Port<T, InferDirectionByPort<T, U>> = {
-      postMessage(t, p) {
-        channel.send({ t, p, _$: 'un' });
-      },
-      onMessage(t, handler) {
-        handlers[t] = handler;
-      },
-    };
-    Object.assign(this, port);
     return this;
   }
 
-  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = missingChannelImplementation
+  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = (t, p) => {
+    if (!this.channel) {
+      throw new Error('Port is not implemented or has been destroyed');
+    }
+    this.channel.send({ t, p, _$: 'un' });
+  }
 
-  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = missingChannelImplementation
+  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = (t, handler) => {
+    if (!this.handlers[t]) {
+      this.handlers[t] = [];
+    }
+    this.handlers[t].push(handler);
+  }
+
+  destroy() {
+    this.handlers = {};
+    this.channel?.destroy && this.channel.destroy();
+    delete this.channel;
+  }
 }

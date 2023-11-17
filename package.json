@@ -27,7 +27,7 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint -c .eslintrc.js src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "test:wwatch": "vitest",
+    "test:watch": "vitest",
     "test": "vitest run",
     "cov": "vitest run --coverage",
     "release": "quick-publish"
