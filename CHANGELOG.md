@@ -1,3 +1,12 @@
+# [0.3.0](https://github.com/ulivz/unport/compare/v0.2.0...v0.3.0) (2023-11-17)
+
+
+### Features
+
+* support watch message multiple times and allow user to destroy a port ([#1](https://github.com/ulivz/unport/issues/1)) ([a179e61](https://github.com/ulivz/unport/commit/a179e616983004f04e40ae9b85ea73cbe81d9083))
+
+
+
 # [0.2.0](https://github.com/ulivz/unport/compare/v0.1.0...v0.2.0) (2023-11-17)
 
 
