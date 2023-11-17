@@ -21,7 +21,6 @@ childPort.onMessage('syn', payload => {
   console.log('[child] [syn]', payload.pid);
   childPort.postMessage('ack', { pid: 'child' });
 });
-
 childPort.onMessage('body', payload => {
   console.log('[child] [body]', JSON.stringify(payload));
 });

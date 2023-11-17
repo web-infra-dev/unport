@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket-IO client</title>
+    <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // FIXME: using CDN link
+      class Unport {
+        constructor() {
+          this.handlers = {};
+          this.postMessage = (t, p) => {
+            if (!this.channel) {
+              throw new Error("Port is not implemented or has been destroyed");
+            }
+            this.channel.send({ t, p, _$: "un" });
+          };
+          this.onMessage = (t, handler) => {
+            if (!this.handlers[t]) {
+              this.handlers[t] = [];
+            }
+            this.handlers[t].push(handler);
+          };
+        }
+        implementChannel(channel) {
+          this.channel = typeof channel === "function" ? channel() : channel;
+          this.channel.accept((message) => {
+            if (typeof message === "object" && message._$ === "un") {
+              const { t, p } = message;
+              const handler = this.handlers[t];
+              if (handler) {
+                handler.forEach((fn) => fn(p));
+              }
+            }
+          });
+          return this;
+        }
+        destroy() {
+          var _a;
+          this.handlers = {};
+          ((_a = this.channel) === null || _a === void 0
+            ? void 0
+            : _a.destroy) && this.channel.destroy();
+          delete this.channel;
+        }
+      }
+
+      // 1. Initialize a port
+      const clientPort = new Unport();
+      const socket = io("http://localhost:10101/");
+
+      // 2. Implement a UnportChannel based on underlying Socket.IO
+      socket.on("connect", () => {
+        clientPort.implementChannel(() => ({
+          send: function (message) {
+            socket.emit("message", message);
+          },
+          accept: function (pipe) {
+            socket.on("message", pipe);
+          },
+        }));
+
+        // 3. You get a complete typed Port with a unified interface 🤩
+        clientPort.postMessage("syn", { pid: "parent" });
+        clientPort.onMessage("ack", (payload) => {
+          console.log("[parent] [ack]", payload.pid);
+          clientPort.postMessage("body", {
+            name: "index",
+            path: " /",
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -29,6 +29,7 @@ Each of these JSContext environments exhibits distinct methods of communicating 
     - [.implementChannel()](#implementchannel)
     - [.postMessage()](#postmessage)
     - [.onMessage()](#onmessage)
+    - [.pipe()](#pipe)
   - [UnportChannelMessage](#unportchannelmessage)
 - [🤝 Contributing](#-contributing)
 - [🤝 Credits](#-credits)
@@ -138,6 +139,7 @@ childPort.implementChannel({
   },
 });
 
+// 3. You get a complete typed Port with a unified interface 🤩
 childPort.onMessage('syn', payload => {
   console.log('[child] [syn]', payload.pid);
   childPort.postMessage('ack', { pid: 'child' });
@@ -258,6 +260,27 @@ parentPort.onMessage('ack', payload => {
   });
 });
 ```
+
+#### .pipe()
+
+- Type: `(message: UnportChannelMessage) => void`
+
+The `pipe` method is used to manually handle incoming messages. It's often used in Server with `one-to-many` connections, e.g. Web Socket.
+
+Example:
+
+```ts
+const channel = port.implementChannel({
+  send: (message) => {
+    // send message to the other end of the channel
+  },
+});
+
+// when a message is received
+channel.pipe(message);
+```
+
+See our [Web Socket](./examples/web-socket/) example to check more details.
 
 ### UnportChannelMessage
 
