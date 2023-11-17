@@ -46,11 +46,12 @@ server.listen(10101);
 
 // You'll get many ports so that you need to retrieve it before using it.
 const serverPort = socketPorts.get('<id>' /* id */);
-
-serverPort.onMessage('syn', payload => {
-  console.log('[child] [syn]', payload.pid);
-  serverPort.postMessage('ack', { pid: 'child' });
-});
-serverPort.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload));
-});
+if (serverPort) {
+  serverPort.onMessage('syn', payload => {
+    console.log('[child] [syn]', payload.pid);
+    serverPort.postMessage('ack', { pid: 'child' });
+  });
+  serverPort.onMessage('body', payload => {
+    console.log('[child] [body]', JSON.stringify(payload));
+  });
+}

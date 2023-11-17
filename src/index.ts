@@ -137,7 +137,10 @@ export interface UnportChannel {
   send(message: UnportChannelMessage): void;
   accept?(pipe: (message: UnportChannelMessage) => unknown): void;
   destroy?(): void;
-  pipe?(message: UnportChannelMessage): unknown;
+}
+
+export interface EnhancedChannel extends UnportChannel {
+  pipe(message: UnportChannelMessage): unknown;
 }
 
 /**
@@ -147,9 +150,10 @@ export class Unport<T extends MessageDefinition, U extends InferPorts<T>>
 implements Port<T, InferDirectionByPort<T, U>> {
   private handlers: Record<string | number | symbol, Callback<[any]>[]> = {};
 
-  public channel?: UnportChannel;
+  public channel?: EnhancedChannel;
 
-  implementChannel(channel: UnportChannel | (() => UnportChannel)): UnportChannel {
+  implementChannel(channel: UnportChannel | (() => UnportChannel)): EnhancedChannel {
+    // @ts-expect-error We will assign it immediately
     this.channel = typeof channel === 'function' ? channel() : channel;
     if (typeof this.channel === 'object' && typeof this.channel.send === 'function') {
       this.channel.pipe = (message: UnportChannelMessage) => {

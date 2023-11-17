@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "allowJs": false,
     "alwaysStrict": true,
+    "skipLibCheck": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitOnError": false,
