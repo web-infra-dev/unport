@@ -27,8 +27,9 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint -c .eslintrc.js src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "test": "vitest",
-    "cov": "vitest --coverage",
+    "test:wwatch": "vitest",
+    "test": "vitest run",
+    "cov": "vitest run --coverage",
     "release": "quick-publish"
   },
   "engines": {

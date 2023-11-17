@@ -6,3 +6,4 @@ examples-compiled
 *.tsbuildinfo
 tsconfig.examples.tsbuildinfo
 tsconfig.tsbuildinfo
+coverage    

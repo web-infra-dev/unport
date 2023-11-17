@@ -6,8 +6,6 @@
 <div align="center">
 
 [![NPM version][npm-badge]][npm-url]
-[![Build Status][ci-badge]][ci-url]
-[![Code Coverage][code-coverage-badge]][code-coverage-url]
 
 </div>
 
@@ -291,5 +289,5 @@ MIT License © [ULIVZ](https://github.com/ulivz)
 [npm-url]: https://www.npmjs.com/package/unport
 [ci-badge]: https://github.com/ulivz/unport/actions/workflows/ci.yml/badge.svg?event=push&branch=main
 [ci-url]: https://github.com/ulivz/unport/actions/workflows/ci.yml?query=event%3Apush+branch%3Amain
-[code-coverage-badge]: https://codecov.io/github/ULIVZ/unport/branch/main/graph/badge.svg
-[code-coverage-url]: https://codecov.io/gh/ULIVZ/unport
+[code-coverage-badge]: https://codecov.io/github/ulivz/unport/branch/main/graph/badge.svg
+[code-coverage-url]: https://codecov.io/gh/ulivz/unport
