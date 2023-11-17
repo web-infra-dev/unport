@@ -35,13 +35,11 @@ Unport is designed to solve the complexity of JSContext environments such as [No
 
 ## 💡 Features
 
-1. Provides a unified Port paradigm. You only need to define the message types that different JSContexts need to pass, and you will get a unified type of Port:
+1. Provides a unified Port paradigm. You only need to define the message types ([MessageDefinition](#messagedefinition)) and Intermediate communication channel ([UnportChannel](#unportchannel)) that different JSContexts need to pass, and you will get a unified type of Port:
+2. 100% type inference. Users only need to maintain the message types between JSContexts, and leave the rest to unport.
+3. Lightweight size and succinct API.
 
 ![IPC](https://github.com/ulivz/unport/blob/main/.media/ipc.png?raw=true)
-
-1. 100% type inference. Users only need to maintain the types of communication between JSContexts, and leave the rest to unport.
-2. Lightweight and succinct API.
-
 
 
 ## 🛠️ Install
