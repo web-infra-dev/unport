@@ -79,20 +79,22 @@ export type InferPorts<T extends MessageDefinition> = {
  * For example, with following @type {MessageDefinition}: { "server2client": { ... } }
  * and port "client", the inferred direction will be 'client2server'
  */
-type InferDirectionByPort<T extends MessageDefinition, U extends InferPorts<T>> =
-  {
-    [k in Direction<T>]: k extends `${infer A}2${infer B}`
-      ? A extends U
-        ? `${A}2${B}` :
-        B extends U ? `${B}2${A}` : k : k;
-  }[keyof T];
+type InferDirectionByPort<T extends MessageDefinition, U extends InferPorts<T>> = {
+  [k in Direction<T>]: k extends `${infer A}2${infer B}`
+    ? A extends U
+      ? `${A}2${B}`
+      : B extends U
+        ? `${B}2${A}`
+        : k
+    : k;
+}[keyof T];
 /**
  * Reverse direction
  */
 type ReverseDirection<
   U extends MessageDefinition,
   T extends Direction<U>,
-  Sep extends string = '2'
+  Sep extends string = '2',
 > = T extends `${infer A}${Sep}${infer B}` ? `${B}${Sep}${A}` : T;
 /**
  * `Payload` type is a utility to extract the payload type of a specific message, given its
@@ -102,16 +104,13 @@ type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyo
 /**
  * `Callback` is a type representing a generic function
  */
-type Callback<
-  T extends unknown[] = [],
-  U = unknown,
-> = (...args: T) => U;
+type Callback<T extends unknown[] = [], U = unknown> = (...args: T) => U;
 
 interface Port<T extends MessageDefinition, D extends Direction<T>> {
   postMessage<U extends keyof T[D]>(t: U, p: Payload<T, D, U>): void;
   onMessage<U extends keyof T[ReverseDirection<T, D>]>(
     t: U,
-    handler: Callback<[Payload<T, ReverseDirection<T, D>, U>]>
+    handler: Callback<[Payload<T, ReverseDirection<T, D>, U>]>,
   ): void;
 }
 /**
@@ -136,48 +135,54 @@ export interface UnportChannelMessage {
  */
 export interface UnportChannel {
   send(message: UnportChannelMessage): void;
-  accept(pipe: (message: UnportChannelMessage) => void): void;
+  accept?(pipe: (message: UnportChannelMessage) => unknown): void;
   destroy?(): void;
+  pipe?(message: UnportChannelMessage): unknown;
 }
 
 /**
  * Expose Unport class
  */
-export class Unport<
-  T extends MessageDefinition,
-  U extends InferPorts<T>> implements Port<T, InferDirectionByPort<T, U>> {
+export class Unport<T extends MessageDefinition, U extends InferPorts<T>>
+implements Port<T, InferDirectionByPort<T, U>> {
   private handlers: Record<string | number | symbol, Callback<[any]>[]> = {};
 
-  private channel?: UnportChannel;
+  public channel?: UnportChannel;
 
-  implementChannel(channel: UnportChannel | (() => UnportChannel)) {
+  implementChannel(channel: UnportChannel | (() => UnportChannel)): UnportChannel {
     this.channel = typeof channel === 'function' ? channel() : channel;
-    this.channel.accept(message => {
-      if (typeof message === 'object' && message._$ === 'un') {
-        const { t, p } = message;
-        const handler = this.handlers[t];
-        if (handler) {
-          handler.forEach(fn => fn(p));
+    if (typeof this.channel === 'object' && typeof this.channel.send === 'function') {
+      this.channel.pipe = (message: UnportChannelMessage) => {
+        if (typeof message === 'object' && message._$ === 'un') {
+          const { t, p } = message;
+          const handler = this.handlers[t];
+          if (handler) {
+            handler.forEach(fn => fn(p));
+          }
         }
+      };
+      if (typeof this.channel.accept === 'function') {
+        this.channel.accept(message => this.channel && this.channel.pipe?.(message));
       }
-    });
-
-    return this;
+    } else {
+      throw new Error('[1] invalid channel implementation');
+    }
+    return this.channel;
   }
 
   postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = (t, p) => {
     if (!this.channel) {
-      throw new Error('Port is not implemented or has been destroyed');
+      throw new Error('[2] Port is not implemented or has been destroyed');
     }
     this.channel.send({ t, p, _$: 'un' });
-  }
+  };
 
   onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = (t, handler) => {
     if (!this.handlers[t]) {
       this.handlers[t] = [];
     }
     this.handlers[t].push(handler);
-  }
+  };
 
   destroy() {
     this.handlers = {};
