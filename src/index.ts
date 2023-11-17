@@ -137,6 +137,7 @@ export interface UnportChannel {
   send(message: UnportChannelMessage): void;
   accept?(pipe: (message: UnportChannelMessage) => unknown): void;
   destroy?(): void;
+  pipe?(message: UnportChannelMessage): unknown;
 }
 
 export interface EnhancedChannel extends UnportChannel {
