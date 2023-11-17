@@ -88,7 +88,7 @@ import { ParentPort } from './port';
 // 1. Initialize a port
 const parentPort: ParentPort = new Unport();
 
-// 2. Implement a universal port based on underlying IPC capabilities
+// 2. Implement a UnportChannel based on underlying IPC capabilities
 const childProcess = fork(join(__dirname, './child.js'));
 parentPort.implementChannel({
   send(message) {
@@ -101,7 +101,7 @@ parentPort.implementChannel({
   },
 });
 
-// 3. Post and listen message
+// 3. You get a complete typed Port with a unified interface 🤩
 parentPort.postMessage('syn', { pid: 'parent' });
 parentPort.onMessage('ack', payload => {
   console.log('[parent] [ack]', payload.pid);
@@ -110,7 +110,6 @@ parentPort.onMessage('ack', payload => {
     path: ' /',
   });
 });
-
 ```
 
 3. Child process implementation:
@@ -123,7 +122,7 @@ import { ChildPort } from './port';
 // 1. Initialize a port
 const childPort: ChildPort = new Unport();
 
-// 2. Implement a unport channel based on underlying IPC capabilities
+// 2. Implement a UnportChannel based on underlying IPC capabilities
 childPort.implementChannel({
   send(message) {
     process.send && process.send(message);
