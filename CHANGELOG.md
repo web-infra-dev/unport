@@ -1,53 +1,32 @@
 # [0.5.0](https://github.com/ulivz/unport/compare/v0.3.1...v0.5.0) (2023-11-17)
 
-
-### Features
-
-* support manual `channel.pipe` ([#2](https://github.com/ulivz/unport/issues/2)) ([b8ef448](https://github.com/ulivz/unport/commit/b8ef4482088e994eef37823a6991a67a93c5c77c))
-
-
+To streamline usage, we have implemented a significant update: the basic concept `UnportChannel` has been renamed to `Channel`, see [3e2bcc7](https://github.com/web-infra-dev/unport/commit/3e2bcc73bb97e7d46b7c7f79a1b9481c98157bdc).
 
 # [0.4.0](https://github.com/ulivz/unport/compare/v0.3.1...v0.4.0) (2023-11-17)
 
 
-### Features
-
-* support manual `channel.pipe` ([c342e2b](https://github.com/ulivz/unport/commit/c342e2bbdc886da5458f18217d80395110df9fe0))
+To support `one-to-many` scenarios and avoid creating multiple Unport instances, we have introduced the [Channel.pipe](https://github.com/web-infra-dev/unport#pipe) method. This allows users to manually send messages through the intermediary pipeline, enhancing efficiency and flexibility, see [b8ef448](https://github.com/web-infra-dev/unport/commit/b8ef4482088e994eef37823a6991a67a93c5c77c).
 
 
 
 ## [0.3.1](https://github.com/ulivz/unport/compare/v0.3.0...v0.3.1) (2023-11-17)
 
+This is a patch release where we have removed some unnecessary logs 
 
 
 # [0.3.0](https://github.com/ulivz/unport/compare/v0.2.0...v0.3.0) (2023-11-17)
 
 
-### Features
-
-* support watch message multiple times and allow user to destroy a port ([#1](https://github.com/ulivz/unport/issues/1)) ([a179e61](https://github.com/ulivz/unport/commit/a179e616983004f04e40ae9b85ea73cbe81d9083))
-
+Added support for watching messages multiple times and provided users with the ability to destroy a port ([#1](https://github.com/ulivz/unport/issues/1)) ([a179e61](https://github.com/ulivz/unport/commit/a179e616983004f04e40ae9b85ea73cbe81d9083))
 
 
 # [0.2.0](https://github.com/ulivz/unport/compare/v0.1.0...v0.2.0) (2023-11-17)
 
+Renamed the exported `UnPort` to `Unport` for consistency and ease of use, see [b1b8b56](b1b8b5694043f1bccbe3f86b78b20351988c0d4f).
 
 
 # [0.1.0](https://github.com/ulivz/unport/compare/93c89d960e8dab105e5e1b46df2b2179bdb1c945...v0.1.0) (2023-11-16)
 
-
-### Features
-
-* first implementation ([fbc6daa](https://github.com/ulivz/unport/commit/fbc6daa6eabc1264416a4dbe2998c4aa429bba0c))
-* init prototype ([93c89d9](https://github.com/ulivz/unport/commit/93c89d960e8dab105e5e1b46df2b2179bdb1c945))
-* protect message ([9521bc9](https://github.com/ulivz/unport/commit/9521bc9f2b5430cbcf69eedcaa80d149ddd52102))
-* simplify channel api ([37ddb50](https://github.com/ulivz/unport/commit/37ddb50c69bffd0ad06df53ca6c85248494121d1))
-* simplify port definitiom ([5620d05](https://github.com/ulivz/unport/commit/5620d0521f678fcb9d45a124e70b4e1a884adc68))
-
-
-### Performance Improvements
-
-* **examples:** improve performance for child-process ([5d08f65](https://github.com/ulivz/unport/commit/5d08f65f90f7fe196c99638d03197d287ae56347))
-
+This is the inaugural release of Unport. It encapsulates the core concept of Unport: `TypedPort = f(types, channel)`. We have successfully implemented the fundamental functionalities.
 
 

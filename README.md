@@ -13,6 +13,10 @@
 
 **Unport is a fully type-inferred IPC (Inter-Process Communication) library**. It ensures robust and reliable cross-context communication with strict type checking, enhancing the predictability and stability of your application.
 
+```math
+Port = f(types, channel)
+```
+
 Unport is  designed to simplify the complexity revolving around various JSContext environments. These environments encompass a wide range of technologies, including [Node.js](https://nodejs.org/), [ChildProcess](https://nodejs.org/api/child_process.html), [Webview](https://en.wikipedia.org/wiki/WebView), [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [worker_threads](https://nodejs.org/api/worker_threads.html), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe), [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel), [ServiceWorker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), and much more.
 
 Each of these JSContexts exhibits distinct methods of communicating with the external world. Still, the lack of defined types can make handling the code for complex projects an arduous task. In the context of intricate and large-scale projects, it's often challenging to track the message's trajectory and comprehend the fields that the recipient necessitates.
@@ -29,6 +33,7 @@ Each of these JSContexts exhibits distinct methods of communicating with the ext
     - [.implementChannel()](#implementchannel)
     - [.postMessage()](#postmessage)
     - [.onMessage()](#onmessage)
+  - [Channel](#channel-1)
     - [.pipe()](#pipe)
   - [ChannelMessage](#channelmessage)
 - [🤝 Contributing](#-contributing)
@@ -260,6 +265,10 @@ parentPort.onMessage('ack', payload => {
   });
 });
 ```
+
+### Channel
+
+When you invoke the [.implementChannel()](#implementchannel) to implement an intermediary pipeline, you will receive a `Channel` instance. This instance comes with several useful methods that enhance the functionality and usability of the pipeline.
 
 #### .pipe()
 
