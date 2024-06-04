@@ -26,8 +26,9 @@ parentPort.implementChannel({
 // 3. Initialize a rpc client from port.
 const parentRpcClient = new Unrpc(parentPort);
 
-parentRpcClient.implement('getInfo', request => ({
-  user: `parent (${request.id})`,
+parentRpcClient.implement('getParentInfo', request => ({
+  from: request.user,
+  parentId: 'parent123',
 }));
 parentRpcClient.port.postMessage('syn', { pid: 'parent' });
 parentRpcClient.port.onMessage('ack', async payload => {

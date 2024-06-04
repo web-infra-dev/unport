@@ -6,19 +6,20 @@ export type Definition = {
     syn: {
       pid: string;
     };
-    getInfo__callback: {
-      user: string;
+    getParentInfo__callback: {
+      parentId: string;
+      from: string;
     };
     getChildInfo: {
       name: string;
     }
   };
   child2parent: {
-    getInfo: {
-      id: string;
+    getParentInfo: {
+      user: string;
     };
     getChildInfo__callback: {
-      clientKey: string;
+      childId: string;
     };
     ack: {
       pid: string;

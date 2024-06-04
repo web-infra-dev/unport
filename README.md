@@ -349,46 +349,22 @@ Consequently, to associate a callback function, it becomes a requirement to incl
 `Unrpc` is provided to address this issue, enabling support for Typed RPC starting from the **protocol layer**:
 
 ```ts
-import { Unrpc } from 'unport';
-
 // "parentPort" is a Port defined based on Unport in the previous example.
 const parent = new Unrpc(parentPort);
 
 // Implementing an RPC method.
-parent.implement('callFoo', request => ({
-  user: `parent (${request.id})`,
+parent.implement('getParentInfo', request => ({
+  id: 'parent',
+  from: request.user,
 }));
-
-// Emit a SYN event.
-parent.port.postMessage('syn', { pid: 'parent' });
-
-// Listen for the ACK message.
-parent.port.onMessage('ack', async payload => {
-  // Call an RPC method as defined by the "child" port.
-  const response = await parent.call('getChildInfo', {
-    name: 'parent',
-  });
-});
 ```
 
 The implementation on the `child` side is as follows:
 
 ```ts
-import { Unrpc } from 'unport';
-
 // "parentPort" is a Port also defined based on Unport.
 const child = new Unrpc(childPort);
-
-child.implement('getChildInfo', request => ({
-  clientKey: `[child] ${request.name}`,
-}));
-
-// Listen for the SYN message.
-child.port.onMessage('syn', async payload => {
-  const response = await child.call('getInfo', { id: '<child>' });
-  // Acknowledge the SYN event.
-  child.port.postMessage('ack', { pid: 'child' });
-});
+const response = await child.call('getParentInfo', { user: "child" }); // => { id: "parent", from: "child" }
 ```
 
 The types are defined as such:
@@ -398,25 +374,13 @@ import { Unport } from 'unport';
 
 export type Definition = {
   parent2child: {
-    syn: {
-      pid: string;
+    getParentInfo__callback: {
+      content: string;
     };
-    getInfo__callback: {
-      user: string;
-    };
-    getChildInfo: {
-      name: string;
-    }
   };
   child2parent: {
-    getInfo: {
-      id: string;
-    };
-    getChildInfo__callback: {
-      clientKey: string;
-    };
-    ack: {
-      pid: string;
+    getParentInfo: {
+      user: string;
     };
   };
 };
@@ -426,6 +390,10 @@ export type ParentPort = Unport<Definition, 'parent'>;
 ```
 
 In comparison to Unport, the only new concept to grasp is that the RPC response message key must end with `__callback`. Other than that, no additional changes are necessary! `Unrpc` also offers comprehensive type inference based on this convention; for instance, you won't be able to implement an RPC method that is meant to serve as a response.
+
+> [!NOTE]  
+> You can find the full code example here: [child-process-rpc](https://github.com/web-infra-dev/unport/tree/main/examples/child-process-rpc).
+> 
 
 ## 🤝 Contributing
 

@@ -19,11 +19,11 @@ childPort.implementChannel({
 // 3. Initialize a rpc client
 const childRpcClient = new Unrpc(childPort);
 childRpcClient.implement('getChildInfo', request => ({
-  clientKey: `[child] ${request.name}`,
+  childId: 'child_123',
 }));
 childRpcClient.port.onMessage('syn', async payload => {
   console.log('[child] [event] [syn] [result]', payload);
-  const response = await childRpcClient.call('getInfo', { id: '<child>' });
+  const response = await childRpcClient.call('getParentInfo', { user: 'child' });
   console.log('[child] [rpc] [getInfo] [response]', response);
   childPort.postMessage('ack', { pid: 'child' });
 });
