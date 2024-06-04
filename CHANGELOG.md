@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/ulivz/unport/compare/v0.5.0...v0.6.0) (2024-06-04)
+
+
+### Features
+
+* typed rpc ([#3](https://github.com/ulivz/unport/issues/3)) ([baa5645](https://github.com/ulivz/unport/commit/baa5645c96a7aade2166ae7e99252b49e3f0c03a))
+
+
+
 # [0.5.0](https://github.com/ulivz/unport/compare/v0.3.1...v0.5.0) (2023-11-17)
 
 To streamline usage, we have implemented a significant update: the basic concept `UnportChannel` has been renamed to `Channel`, see [3e2bcc7](https://github.com/web-infra-dev/unport/commit/3e2bcc73bb97e7d46b7c7f79a1b9481c98157bdc).
