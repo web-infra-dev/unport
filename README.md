@@ -36,6 +36,7 @@ Each of these JSContexts exhibits distinct methods of communicating with the ext
   - [Channel](#channel-1)
     - [.pipe()](#pipe)
   - [ChannelMessage](#channelmessage)
+  - [Unrpc (Experimental)](#unrpc-experimental)
 - [🤝 Contributing](#-contributing)
 - [🤝 Credits](#-credits)
 - [LICENSE](#license)
@@ -298,6 +299,133 @@ The `ChannelMessage` type is used for the message in the `onMessage` method.
 ```ts
 import { ChannelMessage } from 'unport';
 ```
+
+### Unrpc (Experimental)
+
+Starting with the 0.6.0 release, we are experimentally introducing support for Typed [RPC (Remote Procedure Call)](https://en.wikipedia.org/wiki/Remote_procedure_call).
+
+When dealing with a single Port that requires RPC definition, we encounter a problem related to the programming paradigm. It's necessary to define `Request` and `Response` messages such as:
+
+```ts
+export type IpcDefinition = {
+  a2b: {
+    callFoo: {
+      input: string;
+    };
+  };
+  b2a: {
+    callFooCallback: {
+      result: string;
+    };
+  };
+};
+```
+
+In the case where an RPC call needs to be encapsulated, the API might look like this:
+
+```ts
+function rpcCall(request: { input: string; }): Promise<{ result: string; }>;
+```
+
+Consequently, to associate a callback function, it becomes a requirement to include a `CallbackId` at the **application layer** for every RPC method:
+
+```diff
+ export type IpcDefinition = {
+   a2b: {
+     callFoo: {
+       input: string;
++      callbackId: string;
+     };
+   };
+   b2a: {
+     callFooCallback: {
+       result: string;
++      callbackId: string;
+     };
+   };
+ };
+```
+
+`Unrpc` is provided to address this issue, enabling support for Typed RPC starting from the **protocol layer**:
+
+```ts
+import { Unrpc } from 'unport';
+
+// "parentPort" is a Port defined based on Unport in the previous example.
+const parent = new Unrpc(parentPort);
+
+// Implementing an RPC method.
+parent.implement('callFoo', request => ({
+  user: `parent (${request.id})`,
+}));
+
+// Emit a SYN event.
+parent.port.postMessage('syn', { pid: 'parent' });
+
+// Listen for the ACK message.
+parent.port.onMessage('ack', async payload => {
+  // Call an RPC method as defined by the "child" port.
+  const response = await parent.call('getChildInfo', {
+    name: 'parent',
+  });
+});
+```
+
+The implementation on the `child` side is as follows:
+
+```ts
+import { Unrpc } from 'unport';
+
+// "parentPort" is a Port also defined based on Unport.
+const child = new Unrpc(childPort);
+
+child.implement('getChildInfo', request => ({
+  clientKey: `[child] ${request.name}`,
+}));
+
+// Listen for the SYN message.
+child.port.onMessage('syn', async payload => {
+  const response = await child.call('getInfo', { id: '<child>' });
+  // Acknowledge the SYN event.
+  child.port.postMessage('ack', { pid: 'child' });
+});
+```
+
+The types are defined as such:
+
+```ts
+import { Unport } from 'unport';
+
+export type Definition = {
+  parent2child: {
+    syn: {
+      pid: string;
+    };
+    getInfo__callback: {
+      user: string;
+    };
+    getChildInfo: {
+      name: string;
+    }
+  };
+  child2parent: {
+    getInfo: {
+      id: string;
+    };
+    getChildInfo__callback: {
+      clientKey: string;
+    };
+    ack: {
+      pid: string;
+    };
+  };
+};
+
+export type ChildPort = Unport<Definition, 'child'>;
+export type ParentPort = Unport<Definition, 'parent'>;
+```
+
+In comparison to Unport, the only new concept to grasp is that the RPC response message key must end with `__callback`. Other than that, no additional changes are necessary! `Unrpc` also offers comprehensive type inference based on this convention; for instance, you won't be able to implement an RPC method that is meant to serve as a response.
 
 ## 🤝 Contributing
 

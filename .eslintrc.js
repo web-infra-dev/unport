@@ -1,3 +1,6 @@
 module.exports = {
-  extends: "eslint-config-typescript-library",
+  extends: 'eslint-config-typescript-library',
+  rules: {
+    camelcase: 'off',
+  },
 };

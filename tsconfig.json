@@ -1,47 +1,17 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "strictFunctionTypes": true,
-    "incremental": true,
-    "noUncheckedIndexedAccess": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "allowJs": false,
-    "alwaysStrict": true,
-    "skipLibCheck": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitOnError": false,
-    "noImplicitThis": true,
-    "noImplicitAny": true,
-    "rootDir": "src",
-    "outDir": "./lib",
-    "sourceMap": true,
-    "target": "ES2019",
-    "typeRoots": [
-      "node_modules/@types",
-      "types"
-    ],
-    "declaration": true,
-    "declarationMap": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true,
-    "lib": [
-      "es5",
-      "es6"
-    ],
-    "composite": true,
     "paths": {
-      "unport": ["./src/index.ts"]
+      "unport": [
+        "./src/index.ts"
+      ]
     }
   },
-  "include": [
-    "src",
-    "types",
-    "*.d.ts"
-  ],
-  "exclude": [
-    "node_modules"
+  "references": [
+    {
+      "path": "./tsconfig.src.json"
+    },
+    {
+      "path": "./tsconfig.examples.json"
+    }
   ]
 }

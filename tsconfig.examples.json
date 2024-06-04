@@ -1,5 +1,4 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "examples",
@@ -13,7 +12,7 @@
   ],
   "references": [
     {
-      "path": "./tsconfig.json"
+      "path": "./tsconfig.src.json"
     }
   ]
 }
