@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * @license
  * Copyright (c) ULIVZ. All Rights Reserved.
@@ -100,30 +101,85 @@ type ReverseDirection<
  * `Payload` type is a utility to extract the payload type of a specific message, given its
  * direction and the name.
  */
-type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]> = T[D][U];
+export type Payload<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]> = T[D][U];
 /**
  * `Callback` is a type representing a generic function
  */
 type Callback<T extends unknown[] = [], U = unknown> = (...args: T) => U;
-
+/**
+ * A base interface used to describe a Message Port
+ */
 interface Port<T extends MessageDefinition, D extends Direction<T>> {
-  postMessage<U extends keyof T[D]>(t: U, p: Payload<T, D, U>): void;
+  // eslint-disable-next-line no-use-before-define
+  postMessage<U extends keyof T[D]>(t: U, p?: Payload<T, D, U>, extra?: Pick<ChannelMessage, 'd' | 'c' | 'e'>): void;
   onMessage<U extends keyof T[ReverseDirection<T, D>]>(
     t: U,
     handler: Callback<[Payload<T, ReverseDirection<T, D>, U>]>,
   ): void;
 }
+
+export type EnsureString<T> = T extends string ? T : never;
+export type CallbackSuffix = '__callback';
+
+/**
+ * A generic type used to infer the return value type of an Rpc call. For example, when you call
+ * "foo" on one end of the port, the return value is of the type defined by "foo__callback" on
+ * the other end.
+ */
+export type CallbackPayload<
+  T extends MessageDefinition,
+  D extends Direction<T>,
+  U extends keyof T[D],
+  S extends EnsureString<U> = EnsureString<U>
+> =
+  `${S}${CallbackSuffix}` extends keyof T[ReverseDirection<T, D>]
+    ? Payload<T, ReverseDirection<T, D>, `${S}${CallbackSuffix}`> : unknown;
+
+/**
+ * We filtered the messages, only the message without {@type {CallbackSuffix}} is defined rpc method.
+ */
+export type RpcMethod<T extends MessageDefinition, D extends Direction<T>, U extends keyof T[D]>
+  = U extends `${infer A}${CallbackSuffix}` ? never : U;
+
+/**
+ * A base interface used to describe a Rpc client instance.
+ */
+export interface Rpc<T extends MessageDefinition, D extends Direction<T>, > {
+  call<U extends keyof T[D]>(t: RpcMethod<T, D, U>, p: Payload<T, D, U>): Promise<CallbackPayload<T, D, U>>;
+  implement<R extends keyof T[ReverseDirection<T, D>]>(
+    t: RpcMethod<T, ReverseDirection<T, D>, R>,
+    handler: Callback<
+    [Payload<T, ReverseDirection<T, D>, R>],
+    CallbackPayload<T, ReverseDirection<T, D>, R> | Promise<CallbackPayload<T, ReverseDirection<T, D>, R>>
+    >,
+  ): void;
+}
+
+// eslint-disable-next-line no-shadow
+export const enum ChannelMessageErrorCode {
+  NotImplemented = 'NOT_IMPLEMENTED',
+  ExecutionError = 'EXECUTION_ERROR',
+}
+
+/**
+ * Different messages or methods define different Responses, so it is an any.
+ */
+export type Result = any;
+
 /**
  * `ChannelMessage` interface defines the structure of a message that can be sent
  * or received through an `Channel`.
  *
  * It contains a `t` field for the name of the message, and a `p` field for the payload
- * of the message.
+ * of the message, `d` for the message id.
  */
 export interface ChannelMessage {
-  t: string | number | symbol;
-  p: any;
   _$: 'un';
+  t: string | number | symbol; /* message key */
+  p?: Result; /* message payload */
+  d?: number; /* message id */
+  e?: string; /* error message */
+  c?: ChannelMessageErrorCode; /* error code */
 }
 
 /**
@@ -147,17 +203,30 @@ export interface EnhancedChannel extends Channel {
 /**
  * Expose Unport class
  */
-export class Unport<T extends MessageDefinition, U extends InferPorts<T>>
-implements Port<T, InferDirectionByPort<T, U>> {
+export class Unport<
+  T extends MessageDefinition,
+  U extends InferPorts<T>
+> implements Port<T, InferDirectionByPort<T, U>> {
   private handlers: Record<string | number | symbol, Callback<[any]>[]> = {};
 
   public channel?: EnhancedChannel;
 
-  implementChannel(channel: Channel | (() => Channel)): EnhancedChannel {
+  public channelReceiveMessageListener?: (message: ChannelMessage) => unknown;
+
+  public setChannelReceiveMessageListener(listener: (message: ChannelMessage) => unknown) {
+    if (typeof listener === 'function') {
+      this.channelReceiveMessageListener = listener;
+    }
+  }
+
+  public implementChannel(channel: Channel | (() => Channel)): EnhancedChannel {
     // @ts-expect-error We will assign it immediately
     this.channel = typeof channel === 'function' ? channel() : channel;
     if (typeof this.channel === 'object' && typeof this.channel.send === 'function') {
       this.channel.pipe = (message: ChannelMessage) => {
+        if (typeof this.channelReceiveMessageListener === 'function') {
+          this.channelReceiveMessageListener(message);
+        }
         if (typeof message === 'object' && message._$ === 'un') {
           const { t, p } = message;
           const handler = this.handlers[t];
@@ -175,23 +244,151 @@ implements Port<T, InferDirectionByPort<T, U>> {
     return this.channel;
   }
 
-  postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = (t, p) => {
+  public postMessage: Port<T, InferDirectionByPort<T, U>>['postMessage'] = (t, p, extra) => {
     if (!this.channel) {
       throw new Error('[2] Port is not implemented or has been destroyed');
     }
-    this.channel.send({ t, p, _$: 'un' });
+    this.channel.send({ ...(extra || {}), t, p, _$: 'un' });
   };
 
-  onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = (t, handler) => {
+  public onMessage: Port<T, InferDirectionByPort<T, U>>['onMessage'] = (t, handler) => {
     if (!this.handlers[t]) {
       this.handlers[t] = [];
     }
     this.handlers[t].push(handler);
   };
 
-  destroy() {
+  public destroy() {
     this.handlers = {};
     this.channel?.destroy && this.channel.destroy();
     delete this.channel;
   }
+}
+
+const CALLBACK_SUFFIX: CallbackSuffix = '__callback';
+
+export class UnrpcNotImplementationError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = ChannelMessageErrorCode.NotImplemented;
+  }
+}
+
+export class UnrpcExecutionErrorError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = ChannelMessageErrorCode.ExecutionError;
+  }
+}
+
+/**
+ * Check if the given object is a Promise or PromiseLike.
+ *
+ * @param value - The object to check.
+ * @returns True if the object is a Promise or PromiseLike, otherwise false.
+ */
+function isPromise(value: any): value is Promise<any> {
+  // Check if the value is an object and not null, then check if it has a 'then' function
+  return !!value && (typeof value === 'object' || typeof value === 'function') && typeof value.then === 'function';
+}
+
+/**
+ * Expose Unrpc class
+ */
+export class Unrpc<T extends MessageDefinition, U extends InferPorts<T>> implements Rpc<T, InferDirectionByPort<T, U>> {
+  private callbackMap = new Map<number, [Callback<[any]>, Callback<[any]>]>();
+
+  private currentCallbackId = 0;
+
+  private implementations = new Map<string | number | symbol, Callback<[any]>>();
+
+  constructor(public readonly port: Unport<T, U>) {
+    /**
+     * The implementation of Rpc is based on the message protocol layer {@type {ChannelMessage}} at {@type {Unport}}.
+     */
+    this.port.setChannelReceiveMessageListener(message => {
+      if (typeof message === 'object' && message._$ === 'un') {
+        const { t, p, d } = message;
+        const messageKey = String(t);
+        /**
+        * If a message contains "d" field, it is considered a message sent by Rpc.
+        * Therefore, messages sent directly by {@type {Unport#postMessage}} will not be affected in any way.
+        */
+        if (typeof d === 'number') {
+          /**
+           * If a message ends with {@type {CALLBACK_SUFFIX}}, it is considered a Response message of Rpc
+           */
+          if (messageKey.endsWith(CALLBACK_SUFFIX)) {
+            const callbackTuple = this.callbackMap.get(d);
+            if (callbackTuple) {
+              const [resolve, reject] = callbackTuple;
+              if (message.c) {
+                switch (message.c) {
+                  case ChannelMessageErrorCode.NotImplemented:
+                    reject(new UnrpcNotImplementationError(message.e)); break;
+                  case ChannelMessageErrorCode.ExecutionError:
+                    reject(new UnrpcExecutionErrorError(message.e)); break;
+                  default:
+                    /* c8 ignore next */
+                    reject(new Error(message.e));
+                }
+              } else {
+                resolve(p);
+              }
+            }
+          } else {
+            /**
+             * If a message is not a callback, it is considered a rpc request.
+             */
+            const handler = this.implementations.get(t);
+            const callbackMessageKey = `${messageKey}${CALLBACK_SUFFIX}` as keyof T[InferDirectionByPort<T, U>];
+            if (handler) {
+              const handleCallback = (result: Result) => {
+                this.port.postMessage(callbackMessageKey, result, {
+                  d,
+                });
+              };
+              const handleExecutionError = (e: Result) => {
+                this.port.postMessage(callbackMessageKey, undefined, {
+                  d,
+                  c: ChannelMessageErrorCode.ExecutionError,
+                  e: e instanceof Error ? e.message : String(e),
+                });
+              };
+              let result: Result;
+              try {
+                result = handler(p);
+              } catch (e) {
+                handleExecutionError(e);
+              }
+              if (isPromise(result)) {
+                result.then(handleCallback).catch(handleExecutionError);
+              } else {
+                handleCallback(result);
+              }
+            } else {
+              this.port.postMessage(callbackMessageKey, undefined, {
+                d,
+                c: ChannelMessageErrorCode.NotImplemented,
+                e: `Method ${messageKey} is not implemented`,
+              });
+            }
+          }
+        }
+      }
+    });
+  }
+
+  public call: Rpc<T, InferDirectionByPort<T, U>>['call'] = async (t, p) => {
+    const callbackId = this.currentCallbackId++;
+    const response = new Promise<CallbackPayload<T, InferDirectionByPort<T, U>, typeof t>>((resolve, reject) => {
+      this.callbackMap.set(callbackId, [resolve, reject]);
+    });
+    this.port.postMessage(t, p, { d: callbackId });
+    return response;
+  };
+
+  public implement: Rpc<T, InferDirectionByPort<T, U>>['implement'] = (t, p) => {
+    this.implementations.set(t, p);
+  };
 }

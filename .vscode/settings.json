@@ -8,7 +8,7 @@
     "markdown"
   ],
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "search.exclude": {
     "**/.git": true,
@@ -43,7 +43,9 @@
   "liveServer.settings.port": 5501,
   "js/ts.implicitProjectConfig.strictNullChecks": false,
   "cSpell.words": [
+    "camelcase",
     "insx",
-    "Unport"
+    "Unport",
+    "Unrpc"
   ]
 }
