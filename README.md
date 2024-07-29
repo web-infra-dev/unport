@@ -121,6 +121,15 @@ parentPort.onMessage('ack', payload => {
     path: ' /',
   });
 });
+
+// 4. If you want to remove some listeners
+const handleAck = (payload) => {
+  console.log('[parent] [syn]');
+};
+parentPort.onMessage('ack', handleAck);
+parentPort.offListener('ack', handleAck);
+// Note: if the second param of `offListener` is omitted, all listeners will be removed.
+parentPort.offMessage('ack');
 ```
 
 3. Child process implementation:
@@ -154,6 +163,15 @@ childPort.onMessage('syn', payload => {
 childPort.onMessage('body', payload => {
   console.log('[child] [body]', JSON.stringify(payload));
 });
+
+// 4. If you want to remove some listeners by `offMessage`
+const handleSyn = (payload) => {
+  console.log('[child] [syn]');
+};
+childPort.onMessage('syn', handleSyn);
+childPort.offListener('syn', handleSyn);
+// Note: if the second param of `offListener` is omitted, all listeners will be removed.
+childPort.offMessage('syn');
 ```
 
 ## 📖 Basic Concepts
