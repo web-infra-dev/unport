@@ -116,6 +116,10 @@ interface Port<T extends MessageDefinition, D extends Direction<T>> {
     t: U,
     handler: Callback<[Payload<T, ReverseDirection<T, D>, U>]>,
   ): void;
+  removeMessageListener<U extends keyof T[ReverseDirection<T, D>]>(
+    t: U,
+    handler?: Callback<[Payload<T, ReverseDirection<T, D>, U>]>,
+  ): void;
 }
 
 export type EnsureString<T> = T extends string ? T : never;
@@ -256,6 +260,20 @@ export class Unport<
       this.handlers[t] = [];
     }
     this.handlers[t].push(handler);
+  };
+
+  public removeMessageListener: Port<T, InferDirectionByPort<T, U>>['removeMessageListener'] = (t, handler) => {
+    if (!this.handlers[t]) {
+      return;
+    }
+    if (handler) {
+      this.handlers[t] = this.handlers[t].filter(h => h !== handler);
+      if (this.handlers[t].length === 0) {
+        delete this.handlers[t];
+      }
+    } else {
+      delete this.handlers[t];
+    }
   };
 
   public destroy() {

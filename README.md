@@ -17,7 +17,7 @@
 Port = f(types, channel)
 ```
 
-Unport is  designed to simplify the complexity revolving around various JSContext environments. These environments encompass a wide range of technologies, including [Node.js](https://nodejs.org/), [ChildProcess](https://nodejs.org/api/child_process.html), [Webview](https://en.wikipedia.org/wiki/WebView), [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [worker_threads](https://nodejs.org/api/worker_threads.html), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe), [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel), [ServiceWorker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), and much more.
+Unport is designed to simplify the complexity revolving around various JSContext environments. These environments encompass a wide range of technologies, including [Node.js](https://nodejs.org/), [ChildProcess](https://nodejs.org/api/child_process.html), [Webview](https://en.wikipedia.org/wiki/WebView), [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [worker_threads](https://nodejs.org/api/worker_threads.html), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe), [MessageChannel](https://developer.mozilla.org/en-US/docs/Web/API/MessageChannel), [ServiceWorker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), and much more.
 
 Each of these JSContexts exhibits distinct methods of communicating with the external world. Still, the lack of defined types can make handling the code for complex projects an arduous task. In the context of intricate and large-scale projects, it's often challenging to track the message's trajectory and comprehend the fields that the recipient necessitates.
 
@@ -41,7 +41,6 @@ Each of these JSContexts exhibits distinct methods of communicating with the ext
 - [🤝 Credits](#-credits)
 - [LICENSE](#license)
 
-
 ## 💡 Features
 
 1. Provides a unified Port paradigm. You only need to define the message types ([MessageDefinition](#messagedefinition)) and Intermediate communication channel ([Channel](#channel)) that different JSContexts need to pass, and you will get a unified type of Port:
@@ -49,7 +48,6 @@ Each of these JSContexts exhibits distinct methods of communicating with the ext
 3. Lightweight size and succinct API.
 
 ![IPC](https://github.com/ulivz/unport/blob/main/.media/ipc.png?raw=true)
-
 
 ## 🛠️ Install
 
@@ -64,7 +62,7 @@ Let's take ChildProcess as an example to implement a process of sending messages
 1. Define Message Definition:
 
 ```ts
-import { Unport } from 'unport';
+import { Unport } from "unport";
 
 export type Definition = {
   parent2child: {
@@ -74,7 +72,7 @@ export type Definition = {
     body: {
       name: string;
       path: string;
-    }
+    };
   };
   child2parent: {
     ack: {
@@ -83,52 +81,61 @@ export type Definition = {
   };
 };
 
-export type ChildPort = Unport<Definition, 'child'>;
-export type ParentPort = Unport<Definition, 'parent'>;
+export type ChildPort = Unport<Definition, "child">;
+export type ParentPort = Unport<Definition, "parent">;
 ```
 
 2. Parent process implementation:
 
 ```ts
 // parent.ts
-import { join } from 'path';
-import { fork } from 'child_process';
-import { Unport, ChannelMessage } from 'unport';
-import { ParentPort } from './port';
+import { join } from "path";
+import { fork } from "child_process";
+import { Unport, ChannelMessage } from "unport";
+import { ParentPort } from "./port";
 
 // 1. Initialize a port
 const parentPort: ParentPort = new Unport();
 
 // 2. Implement a Channel based on underlying IPC capabilities
-const childProcess = fork(join(__dirname, './child.js'));
+const childProcess = fork(join(__dirname, "./child.js"));
 parentPort.implementChannel({
   send(message) {
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: ChannelMessage) => {
+    childProcess.on("message", (message: ChannelMessage) => {
       pipe(message);
     });
   },
 });
 
 // 3. You get a complete typed Port with a unified interface 🤩
-parentPort.postMessage('syn', { pid: 'parent' });
-parentPort.onMessage('ack', payload => {
-  console.log('[parent] [ack]', payload.pid);
-  parentPort.postMessage('body', {
-    name: 'index',
-    path: ' /',
+parentPort.postMessage("syn", { pid: "parent" });
+parentPort.onMessage("ack", (payload) => {
+  console.log("[parent] [ack]", payload.pid);
+  parentPort.postMessage("body", {
+    name: "index",
+    path: " /",
   });
 });
+
+// 4. If you want to remove some listeners
+const handleAck = (payload) => {
+  console.log("[parent] [syn]");
+};
+parentPort.onMessage("ack", handleAck);
+parentPort.removeMessageListener("ack", handleAck);
+// Note: if the second param of `removeMessageListener` is omitted, all listeners will be removed.
+parentPort.removeMessageList("ack");
 ```
 
 3. Child process implementation:
 
 ```ts
 // child.ts
-import { Unport, ChannelMessage } from 'unport';
-import { ChildPort } from './port';
+import { Unport, ChannelMessage } from "unport";
+import { ChildPort } from "./port";
 
 // 1. Initialize a port
 const childPort: ChildPort = new Unport();
@@ -139,21 +146,30 @@ childPort.implementChannel({
     process.send && process.send(message);
   },
   accept(pipe) {
-    process.on('message', (message: ChannelMessage) => {
+    process.on("message", (message: ChannelMessage) => {
       pipe(message);
     });
   },
 });
 
 // 3. You get a complete typed Port with a unified interface 🤩
-childPort.onMessage('syn', payload => {
-  console.log('[child] [syn]', payload.pid);
-  childPort.postMessage('ack', { pid: 'child' });
+childPort.onMessage("syn", (payload) => {
+  console.log("[child] [syn]", payload.pid);
+  childPort.postMessage("ack", { pid: "child" });
 });
 
-childPort.onMessage('body', payload => {
-  console.log('[child] [body]', JSON.stringify(payload));
+childPort.onMessage("body", (payload) => {
+  console.log("[child] [body]", JSON.stringify(payload));
 });
+
+// 4. If you want to remove some listeners by `removeMessageList`
+const handleSyn = (payload) => {
+  console.log("[child] [syn]");
+};
+childPort.onMessage("syn", handleSyn);
+childPort.removeMessageListener("syn", handleSyn);
+// Note: if the second param of `removeMessageListener` is omitted, all listeners will be removed.
+childPort.removeMessageList("syn");
 ```
 
 ## 📖 Basic Concepts
@@ -175,7 +191,7 @@ export type Definition = {
     body: {
       name: string;
       path: string;
-    }
+    };
   };
   child2parent: {
     ack: {
@@ -207,7 +223,7 @@ parentPort.implementChannel({
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: ChannelMessage) => {
+    childProcess.on("message", (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -225,7 +241,7 @@ By abstracting the details of the underlying communication mechanism, Unport all
 The `Unport` class is used to create a new port.
 
 ```ts
-import { Unport } from 'unport';
+import { Unport } from "unport";
 ```
 
 #### .implementChannel()
@@ -238,7 +254,7 @@ parentPort.implementChannel({
     childProcess.send(message);
   },
   accept(pipe) {
-    childProcess.on('message', (message: ChannelMessage) => {
+    childProcess.on("message", (message: ChannelMessage) => {
       pipe(message);
     });
   },
@@ -250,7 +266,7 @@ parentPort.implementChannel({
 This method is used to post a message.
 
 ```ts
-parentPort.postMessage('syn', { pid: 'parent' });
+parentPort.postMessage("syn", { pid: "parent" });
 ```
 
 #### .onMessage()
@@ -258,11 +274,11 @@ parentPort.postMessage('syn', { pid: 'parent' });
 This method is used to listen for a message.
 
 ```ts
-parentPort.onMessage('ack', payload => {
-  console.log('[parent] [ack]', payload.pid);
-  parentPort.postMessage('body', {
-    name: 'index',
-    path: ' /',
+parentPort.onMessage("ack", (payload) => {
+  console.log("[parent] [ack]", payload.pid);
+  parentPort.postMessage("body", {
+    name: "index",
+    path: " /",
   });
 });
 ```
@@ -297,7 +313,7 @@ See our [Web Socket](./examples/web-socket/) example to check more details.
 The `ChannelMessage` type is used for the message in the `onMessage` method.
 
 ```ts
-import { ChannelMessage } from 'unport';
+import { ChannelMessage } from "unport";
 ```
 
 ### Unrpc (Experimental)
@@ -324,7 +340,7 @@ export type IpcDefinition = {
 In the case where an RPC call needs to be encapsulated, the API might look like this:
 
 ```ts
-function rpcCall(request: { input: string; }): Promise<{ result: string; }>;
+function rpcCall(request: { input: string }): Promise<{ result: string }>;
 ```
 
 Consequently, to associate a callback function, it becomes a requirement to include a `CallbackId` at the **application layer** for every RPC method:
@@ -353,8 +369,8 @@ Consequently, to associate a callback function, it becomes a requirement to incl
 const parent = new Unrpc(parentPort);
 
 // Implementing an RPC method.
-parent.implement('getParentInfo', request => ({
-  id: 'parent',
+parent.implement("getParentInfo", (request) => ({
+  id: "parent",
   from: request.user,
 }));
 ```
@@ -364,13 +380,13 @@ The implementation on the `child` side is as follows:
 ```ts
 // "parentPort" is a Port also defined based on Unport.
 const child = new Unrpc(childPort);
-const response = await child.call('getParentInfo', { user: "child" }); // => { id: "parent", from: "child" }
+const response = await child.call("getParentInfo", { user: "child" }); // => { id: "parent", from: "child" }
 ```
 
 The types are defined as such:
 
 ```ts
-import { Unport } from 'unport';
+import { Unport } from "unport";
 
 export type Definition = {
   parent2child: {
@@ -385,15 +401,14 @@ export type Definition = {
   };
 };
 
-export type ChildPort = Unport<Definition, 'child'>;
-export type ParentPort = Unport<Definition, 'parent'>;
+export type ChildPort = Unport<Definition, "child">;
+export type ParentPort = Unport<Definition, "parent">;
 ```
 
 In comparison to Unport, the only new concept to grasp is that the RPC response message key must end with `__callback`. Other than that, no additional changes are necessary! `Unrpc` also offers comprehensive type inference based on this convention; for instance, you won't be able to implement an RPC method that is meant to serve as a response.
 
 > [!NOTE]  
 > You can find the full code example here: [child-process-rpc](https://github.com/web-infra-dev/unport/tree/main/examples/child-process-rpc).
-> 
 
 ## 🤝 Contributing
 
@@ -410,7 +425,6 @@ Here are some ways you can contribute:
 ## 🤝 Credits
 
 The birth of this project is inseparable from the complex IPC problems we encountered when working in large companies. The previous name of this project was `Multidirectional Typed Port`, and we would like to thank [ahaoboy](https://github.com/ahaoboy) for his previous ideas on this matter.
-
 
 ## LICENSE
 
