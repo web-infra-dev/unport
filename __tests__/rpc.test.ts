@@ -149,4 +149,27 @@ describe('Unrpc', () => {
     expect(response1).toMatchObject({ user: 'child' });
     expect(response2).toMatchObject({ clientKey: 'parent' });
   });
+
+  it('removeMessageListener - remove specific callback', () => {
+    const callback = vi.fn();
+    parent.port.onMessage('getInfo', callback);
+    parent.port.removeMessageListener('getInfo', callback);
+    child.port.postMessage('getInfo', {
+      id: 'child',
+    });
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('removeMessageListener - remove all callbacks for an event', () => {
+    const callback1 = vi.fn();
+    const callback2 = vi.fn();
+    parent.port.onMessage('getInfo', callback1);
+    parent.port.onMessage('getInfo', callback2);
+    parent.port.removeMessageListener('getInfo');
+    child.port.postMessage('getInfo', {
+      id: 'child',
+    });
+    expect(callback1).not.toHaveBeenCalled();
+    expect(callback2).not.toHaveBeenCalled();
+  });
 });
