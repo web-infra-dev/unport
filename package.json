@@ -1,7 +1,7 @@
 {
   "name": "unport",
   "description": "Unport - a Universal Port with strict type inference capability for cross-JSContext communication.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "main": "lib/index.js",
   "module": "esm/index.js",
   "typings": "esm/index.d.ts",
