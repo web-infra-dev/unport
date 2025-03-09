@@ -1,3 +1,12 @@
+## [0.7.1](https://github.com/ulivz/unport/compare/v0.6.0...v0.7.1) (2025-03-09)
+
+
+### Features
+
+* add offListener method ([91ee549](https://github.com/ulivz/unport/commit/91ee5499ec69f3368b7adc447bdcd2e663bccf1c))
+
+
+
 # [0.6.0](https://github.com/ulivz/unport/compare/v0.5.0...v0.6.0) (2024-06-04)
 
 
